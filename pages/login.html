@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - EventEase</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --primary-dark: #2f6fbd;
+            --secondary: #9b51e0;
+            --accent: #ff6b6b;
+            --bg-dark: #0a0a0f;
+            --bg-darker: #050508;
+            --surface: #1a1a24;
+            --surface-light: #2a2a3a;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0c0;
+            --text-muted: #808090;
+            --border: #2a2a3a;
+            --shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            --shadow-light: 0 8px 32px rgba(0, 0, 0, 0.2);
+            --radius: 16px;
+            --radius-large: 24px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+            opacity: 0.1;
+            animation: gradientShift 8s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { transform: translateX(-50%) translateY(-50%) rotate(0deg); }
+            50% { transform: translateX(-30%) translateY(-30%) rotate(180deg); }
+        }
+
+        .login-container {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            position: relative; /* Added for positioning the back button */
+            border: 1px solid var(--border);
+            border-radius: var(--radius-large);
+            padding: 48px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: var(--shadow);
+            position: relative;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .back-home-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none;
+        }
+
+        .back-home-btn:hover {
+            color: var(--primary);
+            transform: translateX(-3px);
+        }
+
+        .back-home-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeIn 0.8s ease-out 0.2s both;
+        }
+
+        .logo svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 16px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo h1 {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .logo p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 400;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            animation: fadeIn 0.6s ease-out calc(0.1s * var(--delay)) both;
+        }
+
+        .form-group:nth-child(3) { --delay: 3; }
+        .form-group:nth-child(4) { --delay: 4; }
+        .form-group:nth-child(5) { --delay: 5; }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 16px 20px;
+            background: var(--surface-light);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+            transform: translateY(-2px);
+        }
+
+        input[type="email"]:hover,
+        input[type="password"]:hover {
+            border-color: var(--text-secondary);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.6s ease-out 0.6s both;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(74, 144, 226, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 32px 0;
+            position: relative;
+            color: var(--text-muted);
+            animation: fadeIn 0.6s ease-out 0.7s both;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border);
+            z-index: -1;
+        }
+
+        .divider span {
+            background: var(--surface);
+            padding: 0 16px;
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 24px;
+            animation: fadeIn 0.6s ease-out 0.8s both;
+        }
+
+        .signup-link p {
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .signup-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .signup-link a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .signup-link a:hover::after {
+            width: 100%;
+        }
+
+        .error-message {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .success-message {
+            background: rgba(74, 144, 226, 0.1);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        /* Loading state */
+        .btn.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .btn.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 32px 24px;
+                margin: 20px;
+            }
+            
+            .logo h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <a href="/index.html" class="back-home-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path d="M10.8284 12.0007L15.7782 16.9504L14.364 18.3646L8 12.0007L14.364 5.63672L15.7782 7.05093L10.8284 12.0007Z"></path></svg>
+            Back to Home
+        </a>
+        <div class="logo">
+            <svg width="48" height="48" viewBox="0 0 48 48">
+                <defs>
+                    <linearGradient id="brandGradient" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#4A90E2" />
+                        <stop offset="100%" stop-color="#9B51E0" />
+                    </linearGradient>
+                </defs>
+                <path fill="url(#brandGradient)" d="M28 4c6 2 9 7 10 13l-7 7-5-5 2-7-7 2-5-5c6-3 9-4 12-5z" />
+                <circle cx="30" cy="14" r="3" fill="#fff" opacity=".9" />
+                <path d="M13 35c3-6 8-10 14-12l5 5c-2 6-6 11-12 14 1-3-2-6-7-7z" fill="#FF6B6B" />
+            </svg>
+            <h1>EventEase</h1>
+            <p>Welcome back! Please sign in to your account.</p>
+        </div>
+
+        <form id="loginForm">
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+            
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <div class="input-wrapper">
+                    <input type="email" id="email" name="email" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-wrapper">
+                    <input type="password" id="password" name="password" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn" id="loginBtn">
+                Sign In
+            </button>
+        </form>
+
+        <div class="divider">
+            <span>or</span>
+        </div>
+
+        <div class="signup-link">
+            <p>Don't have an account?</p>
+            <a href="signup.html">Create one now</a>
+        </div>
+    </div>
+
+    <script>
+        // Authentication system
+        class AuthSystem {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                const form = document.getElementById('loginForm');
+                form.addEventListener('submit', this.handleLogin.bind(this));
+                
+                // Check if user is already logged in
+                if (this.isLoggedIn()) {
+                    this.redirectToDashboard();
+                }
+            }
+
+            async handleLogin(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const loginBtn = document.getElementById('loginBtn');
+                
+                // Show loading state
+                loginBtn.classList.add('loading');
+                loginBtn.textContent = '';
+                
+                // Clear previous messages
+                this.hideMessages();
+                
+                try {
+                    // Simulate API call delay
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    // Check if user exists in localStorage
+                    const users = JSON.parse(localStorage.getItem('eventease_users') || '[]');
+                    const user = users.find(u => u.email === email && u.password === password);
+                    
+                    if (user) {
+                        // Login successful
+                        this.setUserSession(user);
+                        this.showSuccess('Login successful! Redirecting...');
+                        
+                        setTimeout(() => {
+                            this.redirectToDashboard();
+                        }, 1000);
+                    } else {
+                        // Login failed
+                        this.showError('Invalid email or password. Please try again.');
+                    }
+                } catch (error) {
+                    this.showError('An error occurred. Please try again.');
+                } finally {
+                    // Remove loading state
+                    loginBtn.classList.remove('loading');
+                    loginBtn.textContent = 'Sign In';
+                }
+            }
+
+            setUserSession(user) {
+                const sessionData = {
+                    user: {
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                        avatar: user.avatar || this.generateAvatar(user.name)
+                    },
+                    loginTime: new Date().toISOString(),
+                    isLoggedIn: true
+                };
+                
+                localStorage.setItem('eventease_session', JSON.stringify(sessionData));
+            }
+
+            generateAvatar(name) {
+                const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
+                return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4a90e2&color=fff&size=40&font-size=0.6`;
+            }
+
+            isLoggedIn() {
+                const session = localStorage.getItem('eventease_session');
+                if (session) {
+                    const sessionData = JSON.parse(session);
+                    return sessionData.isLoggedIn === true;
+                }
+                return false;
+            }
+
+            redirectToDashboard() {
+                window.location.href = 'functions.html';
+            }
+
+            showError(message) {
+                const errorEl = document.getElementById('errorMessage');
+                errorEl.textContent = message;
+                errorEl.style.display = 'block';
+                errorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            showSuccess(message) {
+                const successEl = document.getElementById('successMessage');
+                successEl.textContent = message;
+                successEl.style.display = 'block';
+            }
+
+            hideMessages() {
+                document.getElementById('errorMessage').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'none';
+            }
+        }
+
+        // Initialize authentication system
+        document.addEventListener('DOMContentLoaded', () => {
+            new AuthSystem();
+        });
+    </script>
+</body>
+</html>

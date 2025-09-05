@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventEase - Seamless Event Management</title>
+    <link rel="stylesheet" href="css/landing.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <svg width="32" height="32" viewBox="0 0 48 48" class="brand-icon">
+                    <defs>
+                        <linearGradient id="brandGradient" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#4A90E2" />
+                            <stop offset="100%" stop-color="#9B51E0" />
+                        </linearGradient>
+                    </defs>
+                    <path fill="url(#brandGradient)" d="M28 4c6 2 9 7 10 13l-7 7-5-5 2-7-7 2-5-5c6-3 9-4 12-5z" />
+                    <circle cx="30" cy="14" r="3" fill="#fff" opacity=".9" />
+                    <path d="M13 35c3-6 8-10 14-12l5 5c-2 6-6 11-12 14 1-3-2-6-7-7z" fill="#FF6B6B" />
+                </svg>
+                <span class="brand-text">EventEase</span>
+            </div>
+            <div class="nav-menu" id="navMenu">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="#contact" class="nav-link">Contact</a>
+            </div>
+            <div class="nav-actions">
+                <!-- Default auth buttons (shown when not logged in) -->
+                <div class="auth-buttons" id="authButtons">
+                    <a href="pages/login.html" class="btn secondary nav-btn">Login</a>
+                    <a href="pages/signup.html" class="btn primary nav-btn">Sign Up</a>
+                </div>
+                
+                <!-- User profile (shown when logged in) -->
+                <div class="user-profile" id="userProfile" style="display: none;">
+                    <div class="user-avatar" id="userAvatar">
+                        <img src="" alt="User" id="avatarImg">
+                    </div>
+                    <div class="user-dropdown">
+                        <div class="user-info">
+                            <div class="user-name" id="userName">User Name</div>
+                            <div class="user-email" id="userEmail">user@example.com</div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <a href="pages/dashboard.html" class="dropdown-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2" fill="none"/>
+                                <polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="2" fill="none"/>
+                            </svg>
+                            Dashboard
+                        </a>
+                        <a href="#" class="dropdown-item" id="logoutBtn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" fill="none"/>
+                                <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="2" fill="none"/>
+                                <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="nav-toggle" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-background">
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
+            <div class="gradient-orb orb-3"></div>
+        </div>
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="title-line">Seamless Event</span>
+                    <span class="title-line gradient-text">Management</span>
+                    <span class="title-line">Made Simple</span>
+                </h1>
+                <p class="hero-description">
+                    Transform your events with EventEase - the all-in-one platform for effortless event planning,
+                    real-time management, and enhanced attendee experiences.
+                </p>
+                <div class="hero-actions">
+                    <a href="pages/signup.html" class="btn primary large">
+                        <span>Get Started Free</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                            <path d="M5 12h14m-7-7l7 7-7 7" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </a>
+                    <a href="pages/dashboard.html" class="btn secondary large">
+                        <span>Watch Demo</span>
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <div class="stat-number">10K+</div>
+                        <div class="stat-label">Events Managed</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">50K+</div>
+                        <div class="stat-label">Happy Users</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">99.9%</div>
+                        <div class="stat-label">Uptime</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="floating-card card-1">
+                    <div class="card-icon">🎫</div>
+                    <div class="card-content">
+                        <div class="card-title">EasyEntry</div>
+                        <div class="card-desc">QR Code Access</div>
+                    </div>
+                </div>
+                <div class="floating-card card-2">
+                    <div class="card-icon">📢</div>
+                    <div class="card-content">
+                        <div class="card-title">Announcements</div>
+                        <div class="card-desc">Real-time Updates</div>
+                    </div>
+                </div>
+                <div class="floating-card card-3">
+                    <div class="card-icon">🚨</div>
+                    <div class="card-content">
+                        <div class="card-title">Emergency</div>
+                        <div class="card-desc">Medical Assistance</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Powerful Features</h2>
+                <p class="section-description">Everything you need to manage successful events</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Easy Entry System</h3>
+                    <p class="feature-description">QR code-based entry system for seamless attendee check-ins and
+                        enhanced security.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path
+                                d="M7 8h10m-10 4h6m-6 4h10M3 4h18a2 2 0 012 2v12a2 2 0 01-2 2H3a2 2 0 01-2-2V6a2 2 0 012-2z"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Real-time Announcements</h3>
+                    <p class="feature-description">Keep attendees informed with instant announcements and priority-based
+                        messaging.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Emergency Response</h3>
+                    <p class="feature-description">Integrated medical assistance with location tracking for rapid
+                        emergency response.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path
+                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Lost & Found Chat</h3>
+                    <p class="feature-description">Community-driven lost and found system with image sharing and
+                        real-time chat.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2 class="cta-title">Ready to Transform Your Events?</h2>
+                <p class="cta-description">Join thousands of event organizers who trust EventEase for their success.</p>
+                <a href="pages/signup.html" class="btn primary large">
+                    <span>Start Your Free Trial</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M5 12h14m-7-7l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="brand">
+                        <svg width="28" height="28" viewBox="0 0 48 48">
+                            <defs>
+                                <linearGradient id="footerGradient" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#4A90E2" />
+                                    <stop offset="100%" stop-color="#9B51E0" />
+                                </linearGradient>
+                            </defs>
+                            <path fill="url(#footerGradient)"
+                                d="M28 4c6 2 9 7 10 13l-7 7-5-5 2-7-7 2-5-5c6-3 9-4 12-5z" />
+                            <circle cx="30" cy="14" r="3" fill="#fff" opacity=".9" />
+                            <path d="M13 35c3-6 8-10 14-12l5 5c-2 6-6 11-12 14 1-3-2-6-7-7z" fill="#FF6B6B" />
+                        </svg>
+                        <span>EventEase</span>
+                    </div>
+                    <p class="footer-description">Seamless event management made simple.</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-section">
+                        <h4>Product</h4>
+                        <a href="#features">Features</a>
+                        <a href="pages/login.html">Login</a>
+                        <a href="pages/signup.html">Sign Up</a>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Support</h4>
+                        <a href="#contact">Contact</a>
+                        <a href="#">Help Center</a>
+                        <a href="#">Documentation</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 EventEase. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Navigation Authentication Handler
+        class NavigationAuth {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                this.updateNavigationState();
+                this.setupLogoutHandler();
+            }
+
+            updateNavigationState() {
+                const session = this.getSession();
+                const authButtons = document.getElementById('authButtons');
+                const userProfile = document.getElementById('userProfile');
+                
+                if (session && session.isLoggedIn) {
+                    // User is logged in - show profile, hide auth buttons
+                    authButtons.style.display = 'none';
+                    userProfile.style.display = 'flex';
+                    
+                    // Update user info
+                    this.updateUserInfo(session.user);
+                } else {
+                    // User is not logged in - show auth buttons, hide profile
+                    authButtons.style.display = 'flex';
+                    userProfile.style.display = 'none';
+                }
+            }
+
+            updateUserInfo(user) {
+                const userName = document.getElementById('userName');
+                const userEmail = document.getElementById('userEmail');
+                const avatarImg = document.getElementById('avatarImg');
+                
+                if (userName) userName.textContent = user.name || 'User';
+                if (userEmail) userEmail.textContent = user.email || '';
+                if (avatarImg) avatarImg.src = user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=4a90e2&color=fff&size=40&font-size=0.6`;
+            }
+
+            setupLogoutHandler() {
+                const logoutBtn = document.getElementById('logoutBtn');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.logout();
+                    });
+                }
+            }
+
+            logout() {
+                // Clear session data
+                localStorage.removeItem('eventease_session');
+                
+                // Update navigation state
+                this.updateNavigationState();
+                
+                // Optional: Show logout confirmation
+                this.showLogoutMessage();
+            }
+
+            showLogoutMessage() {
+                // Create a temporary notification
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 100px;
+                    right: 20px;
+                    background: var(--surface);
+                    color: var(--text-primary);
+                    padding: 16px 24px;
+                    border-radius: var(--radius);
+                    border: 1px solid var(--border);
+                    box-shadow: var(--shadow);
+                    z-index: 10000;
+                    animation: slideInRight 0.3s ease-out;
+                `;
+                notification.textContent = 'Successfully logged out';
+                
+                document.body.appendChild(notification);
+                
+                // Remove notification after 3 seconds
+                setTimeout(() => {
+                    notification.style.animation = 'slideOutRight 0.3s ease-out';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }, 3000);
+            }
+
+            getSession() {
+                try {
+                    const session = localStorage.getItem('eventease_session');
+                    return session ? JSON.parse(session) : null;
+                } catch (error) {
+                    console.error('Error parsing session data:', error);
+                    return null;
+                }
+            }
+        }
+
+        // Initialize navigation authentication when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new NavigationAuth();
+        });
+
+        // Listen for storage changes (when user logs in from another tab)
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'eventease_session') {
+                const navAuth = new NavigationAuth();
+            }
+        });
+
+        // Add CSS animations for notifications
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOutRight {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+    <script src="js/landing.js"></script>
+</body>
+
+</html>
