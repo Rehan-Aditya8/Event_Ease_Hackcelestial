@@ -529,9 +529,10 @@ body {
 }
 
 .features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 32px;
+  justify-content: center;
 }
 
 .feature-card {
@@ -543,6 +544,9 @@ body {
   transition: var(--transition);
   position: relative;
   overflow: hidden;
+  min-height: 200px;
+  flex: 0 0 calc(50% - 16px);
+  max-width: 400px;
 }
 
 .feature-card::before {
@@ -588,6 +592,15 @@ body {
 .feature-description {
   color: var(--text-secondary);
   line-height: 1.6;
+}
+
+/* Lost & Found card styles */
+.lost-found-card {
+  background: var(--surface) !important;
+  border: 2px solid var(--primary) !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* CTA Section */
@@ -791,6 +804,16 @@ body {
     justify-content: center;
   }
 
+  .features-grid {
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  .feature-card {
+    flex: 1 1 100%;
+    max-width: none;
+  }
+
   .section-title {
     font-size: 36px;
   }
@@ -832,7 +855,13 @@ body {
   }
 
   .features-grid {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .feature-card {
+    flex: 1 1 100%;
+    max-width: none;
   }
 
   .floating-card {

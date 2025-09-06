@@ -325,14 +325,8 @@ class LandingPage {
     card.style.opacity = "1";
     card.style.transform = "translateY(0)";
 
-    // Add hover effect enhancement
-    card.addEventListener("mouseenter", () => {
-      card.style.transform = "translateY(-8px) scale(1.02)";
-    });
-
-    card.addEventListener("mouseleave", () => {
-      card.style.transform = "translateY(0) scale(1)";
-    });
+    // Note: Hover effects are handled by CSS, not JavaScript
+    // This ensures better performance and allows CSS transitions to work properly
   }
 
   animateCounter(element) {
