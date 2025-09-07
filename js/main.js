@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const ticketUser = document.getElementById("ticketUser");
     const ticketCode = document.getElementById("ticketCode");
     const qrcodeContainer = document.getElementById("qrcode");
+    const volunteerEasyEntry = document.getElementById("volunteer-easyentry");
     const volunteerScanner = document.getElementById("volunteer-scanner");
     const scannerPreview = document.getElementById("scanner-preview");
     const scanResult = document.getElementById("scan-result");
@@ -30,10 +31,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (role === "volunteer") {
       eventCodeFormCard.classList.add("hidden");
       qrTicket.classList.add("hidden");
-      volunteerScanner.classList.remove("hidden");
-      initQRScanner();
+      volunteerEasyEntry.classList.remove("hidden");
+      setupVolunteerEasyEntry();
     } else {
-      volunteerScanner.classList.add("hidden");
+      volunteerEasyEntry.classList.add("hidden");
       const userEmail = sessionStorage.getItem("userEmail") || userName;
       const savedQRData = localStorage.getItem(`qrData_${userEmail}`);
       if (savedQRData) {
@@ -140,7 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (isVerified) {
         resultHTML = `
-          <h4 style="color: var(--success);">Ticket Verified! ✅</h4>
+          <h4 style="color: var(--success);">Ticket Approved! ✅</h4>
           <p><strong>You can enter.</strong></p>
         `;
         if (scanResult) scanResult.style.borderColor = "var(--success)";
@@ -155,6 +156,128 @@ document.addEventListener("DOMContentLoaded", () => {
       if (resultContent) resultContent.innerHTML = resultHTML;
       if (scanResult) scanResult.classList.remove("hidden");
     }
+  }
+
+  // ====== VOLUNTEER EASYENTRY FUNCTIONALITY ======
+  function setupVolunteerEasyEntry() {
+    const startQRScannerBtn = document.getElementById("start-qr-scanner");
+    const openTicketInputBtn = document.getElementById("open-ticket-input");
+    const closeScannerBtn = document.getElementById("close-scanner");
+    const closeTicketInputBtn = document.getElementById("close-ticket-input");
+    const ticketInputForm = document.getElementById("ticketInputForm");
+    const ticketIdInput = document.getElementById("ticketIdInput");
+    const ticketResult = document.getElementById("ticket-result");
+    const verifyAnotherBtn = document.getElementById("verify-another");
+
+    const volunteerOptions = document.querySelector(".volunteer-options");
+    const volunteerScanner = document.getElementById("volunteer-scanner");
+    const ticketInputSection = document.getElementById("ticket-input-section");
+
+    // QR Scanner button
+    if (startQRScannerBtn) {
+      startQRScannerBtn.addEventListener("click", () => {
+        volunteerOptions.classList.add("hidden");
+        volunteerScanner.classList.remove("hidden");
+        initQRScanner();
+      });
+    }
+
+    // Manual ticket input button
+    if (openTicketInputBtn) {
+      openTicketInputBtn.addEventListener("click", () => {
+        volunteerOptions.classList.add("hidden");
+        ticketInputSection.classList.remove("hidden");
+        ticketIdInput.focus();
+      });
+    }
+
+    // Close scanner button
+    if (closeScannerBtn) {
+      closeScannerBtn.addEventListener("click", () => {
+        volunteerScanner.classList.add("hidden");
+        volunteerOptions.classList.remove("hidden");
+        // Stop camera if running
+        if (scannerPreview && scannerPreview.srcObject) {
+          const tracks = scannerPreview.srcObject.getTracks();
+          tracks.forEach(track => track.stop());
+        }
+      });
+    }
+
+    // Close ticket input button
+    if (closeTicketInputBtn) {
+      closeTicketInputBtn.addEventListener("click", () => {
+        ticketInputSection.classList.add("hidden");
+        volunteerOptions.classList.remove("hidden");
+        ticketInputForm.reset();
+        ticketResult.classList.add("hidden");
+      });
+    }
+
+    // Ticket input form submission
+    if (ticketInputForm) {
+      ticketInputForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const ticketId = ticketIdInput.value.trim();
+        
+        if (ticketId) {
+          handleTicketVerification(ticketId);
+        }
+      });
+    }
+
+    // Verify another button
+    if (verifyAnotherBtn) {
+      verifyAnotherBtn.addEventListener("click", () => {
+        ticketResult.classList.add("hidden");
+        ticketInputForm.reset();
+        ticketIdInput.focus();
+      });
+    }
+  }
+
+  function handleTicketVerification(ticketId) {
+    const ticketResult = document.getElementById("ticket-result");
+    const resultContent = ticketResult.querySelector(".result-content");
+    
+    // Simulate ticket validation (you can modify this logic)
+    const isValidTicket = validateTicketId(ticketId);
+    
+    let resultHTML = "";
+    if (isValidTicket) {
+      resultHTML = `
+        <div class="ticket-approved">
+          <h4 style="color: var(--success);">🎫 Ticket Approved! ✅</h4>
+          <p><strong>Ticket ID:</strong> ${ticketId}</p>
+          <p><strong>Status:</strong> Valid</p>
+          <p><strong>You can enter.</strong></p>
+        </div>
+      `;
+      ticketResult.style.borderColor = "var(--success)";
+    } else {
+      resultHTML = `
+        <div class="ticket-rejected">
+          <h4 style="color: var(--danger);">❌ Invalid Ticket</h4>
+          <p><strong>Ticket ID:</strong> ${ticketId}</p>
+          <p><strong>Status:</strong> Invalid</p>
+          <p>Please check the ticket ID and try again.</p>
+        </div>
+      `;
+      ticketResult.style.borderColor = "var(--danger)";
+    }
+    
+    resultContent.innerHTML = resultHTML;
+    ticketResult.classList.remove("hidden");
+    
+    // Show toast notification
+    showToast(isValidTicket ? "Ticket approved successfully!" : "Invalid ticket ID");
+  }
+
+  function validateTicketId(ticketId) {
+    // Simple validation logic - you can modify this
+    // For demo purposes, accepting ticket IDs that are at least 6 characters
+    // and contain alphanumeric characters
+    return ticketId.length >= 6 && /^[A-Za-z0-9]+$/.test(ticketId);
   }
 
   // ====== ANNOUNCEMENTS FUNCTIONALITY ======
@@ -613,11 +736,22 @@ document.addEventListener("DOMContentLoaded", () => {
   // ====== UPDATE DASHBOARD GREETING ======
   function updateDashboardGreeting(name, role) {
     const userNameEl = document.getElementById("userName");
+    const volunteerUserNameEl = document.getElementById("volunteerUserName");
     const ticketUserEl = document.getElementById("ticketUser");
+    const userDashboard = document.getElementById("user-dashboard");
+    const volunteerDashboard = document.getElementById("volunteer-dashboard");
 
-    let greetingRole = role === "volunteer" ? "Volunteer" : "User";
-
-    if (userNameEl) userNameEl.textContent = `${name}`;
+    // Show appropriate dashboard based on role
+    if (role === "volunteer") {
+      if (userDashboard) userDashboard.classList.add("hidden");
+      if (volunteerDashboard) volunteerDashboard.classList.remove("hidden");
+      if (volunteerUserNameEl) volunteerUserNameEl.textContent = `${name}`;
+    } else {
+      if (userDashboard) userDashboard.classList.remove("hidden");
+      if (volunteerDashboard) volunteerDashboard.classList.add("hidden");
+      if (userNameEl) userNameEl.textContent = `${name}`;
+    }
+    
     if (ticketUserEl) ticketUserEl.textContent = name;
   }
 

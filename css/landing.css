@@ -634,7 +634,7 @@ body {
 
 .cta .btn.primary {
   background: var(--bg-primary);
-  color: var(--primary);
+  color:white;
   border: 1px solid var(--border-color);
 }
 

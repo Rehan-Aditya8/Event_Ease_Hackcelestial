@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -38,8 +37,8 @@
             <div class="nav-actions">
                 <!-- Default auth buttons (shown when not logged in) -->
                 <div class="auth-buttons" id="authButtons">
-                    <a href="pages/login.html" class="btn secondary nav-btn">Login</a>
-                    <a href="pages/signup.html" class="btn primary nav-btn">Sign Up</a>
+                    <button class="btn secondary nav-btn" id="loginBtn">Login</button>
+                    <button class="btn primary nav-btn" id="signupBtn">Sign Up</button>
                 </div>
                 
                 <!-- User profile (shown when logged in) -->
@@ -99,14 +98,11 @@
                 </p>
                 <div class="hero-actions">
                     <a href="pages/signup.html" class="btn primary large">
-                        <span>Get Started Free</span>
+                        <span>Sign Up</span>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                             <path d="M5 12h14m-7-7l7 7-7 7" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
-                    </a>
-                    <a href="pages/dashboard.html" class="btn secondary large">
-                        <span>Watch Demo</span>
                     </a>
                 </div>
                 <div class="hero-stats">
@@ -217,8 +213,8 @@
                 <h2 class="cta-title">Ready to Transform Your Events?</h2>
                 <p class="cta-description">Join thousands of event organizers who trust EventEase for their success.</p>
                 <a href="pages/signup.html" class="btn primary large">
-                    <span>Start Your Free Trial</span>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <span>Sign Up</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" >
                         <path d="M5 12h14m-7-7l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                             stroke-linejoin="round" />
                     </svg>
@@ -269,6 +265,61 @@
             </div>
         </div>
     </footer>
+
+    <!-- Role Selection Modal -->
+    <div id="roleModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Choose Role</h3>
+                <button class="modal-close" id="roleModalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="role-options">
+                    <button class="role-btn" id="userRoleBtn">
+                        <div class="role-icon">👤</div>
+                        <div class="role-text">User</div>
+                    </button>
+                    <button class="role-btn" id="volunteerRoleBtn">
+                        <div class="role-icon">🤝</div>
+                        <div class="role-text">Volunteer</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Volunteer Code Modal -->
+    <div id="volunteerCodeModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Volunteer Access</h3>
+                <button class="modal-close" id="volunteerCodeModalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="volunteerCode">Enter Volunteer Code</label>
+                    <input type="text" id="volunteerCode" placeholder="Enter your volunteer code" required>
+                    <div class="error-message" id="volunteerCodeError" style="display: none;">Invalid code. Please try again.</div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn secondary" id="volunteerCodeCancel">Cancel</button>
+                    <button class="btn primary" id="volunteerCodeSubmit">Continue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Message Modal -->
+    <div id="successModal" class="modal" style="display: none;">
+        <div class="modal-content success-modal">
+            <div class="modal-body">
+                <div class="success-icon">✅</div>
+                <h3 id="successMessage">Success!</h3>
+                <p id="successDescription">Your action was completed successfully.</p>
+                <button class="btn primary" id="successModalClose">Continue</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Navigation Authentication Handler
@@ -374,9 +425,170 @@
             }
         }
 
+        // Role Selection Handler
+        class RoleSelectionHandler {
+            constructor() {
+                this.currentAction = null; // 'login' or 'signup'
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+            }
+
+            setupEventListeners() {
+                // Login and Signup button handlers
+                document.getElementById('loginBtn').addEventListener('click', () => {
+                    this.currentAction = 'login';
+                    this.showRoleModal();
+                });
+
+                document.getElementById('signupBtn').addEventListener('click', () => {
+                    this.currentAction = 'signup';
+                    this.showRoleModal();
+                });
+
+                // Role selection handlers
+                document.getElementById('userRoleBtn').addEventListener('click', () => {
+                    this.handleUserRole();
+                });
+
+                document.getElementById('volunteerRoleBtn').addEventListener('click', () => {
+                    this.showVolunteerCodeModal();
+                });
+
+                // Modal close handlers
+                document.getElementById('roleModalClose').addEventListener('click', () => {
+                    this.hideRoleModal();
+                });
+
+                document.getElementById('volunteerCodeModalClose').addEventListener('click', () => {
+                    this.hideVolunteerCodeModal();
+                });
+
+                document.getElementById('volunteerCodeCancel').addEventListener('click', () => {
+                    this.hideVolunteerCodeModal();
+                });
+
+                document.getElementById('successModalClose').addEventListener('click', () => {
+                    this.hideSuccessModal();
+                });
+
+                // Volunteer code submission
+                document.getElementById('volunteerCodeSubmit').addEventListener('click', () => {
+                    this.handleVolunteerCodeSubmission();
+                });
+
+                // Enter key handler for volunteer code
+                document.getElementById('volunteerCode').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.handleVolunteerCodeSubmission();
+                    }
+                });
+
+                // Close modals when clicking outside
+                document.getElementById('roleModal').addEventListener('click', (e) => {
+                    if (e.target.id === 'roleModal') {
+                        this.hideRoleModal();
+                    }
+                });
+
+                document.getElementById('volunteerCodeModal').addEventListener('click', (e) => {
+                    if (e.target.id === 'volunteerCodeModal') {
+                        this.hideVolunteerCodeModal();
+                    }
+                });
+
+                document.getElementById('successModal').addEventListener('click', (e) => {
+                    if (e.target.id === 'successModal') {
+                        this.hideSuccessModal();
+                    }
+                });
+            }
+
+            showRoleModal() {
+                document.getElementById('roleModal').style.display = 'flex';
+            }
+
+            hideRoleModal() {
+                document.getElementById('roleModal').style.display = 'none';
+            }
+
+            showVolunteerCodeModal() {
+                this.hideRoleModal();
+                document.getElementById('volunteerCodeModal').style.display = 'flex';
+                document.getElementById('volunteerCode').focus();
+            }
+
+            hideVolunteerCodeModal() {
+                document.getElementById('volunteerCodeModal').style.display = 'none';
+                document.getElementById('volunteerCode').value = '';
+                document.getElementById('volunteerCodeError').style.display = 'none';
+            }
+
+            showSuccessModal(message, description) {
+                document.getElementById('successMessage').textContent = message;
+                document.getElementById('successDescription').textContent = description;
+                document.getElementById('successModal').style.display = 'flex';
+            }
+
+            hideSuccessModal() {
+                document.getElementById('successModal').style.display = 'none';
+            }
+
+            handleUserRole() {
+                this.hideRoleModal();
+                // For user role, proceed directly to login/signup page
+                if (this.currentAction === 'login') {
+                    window.location.href = 'pages/login.html';
+                } else {
+                    window.location.href = 'pages/signup.html';
+                }
+            }
+
+            handleVolunteerCodeSubmission() {
+                const volunteerCode = document.getElementById('volunteerCode').value.trim();
+                const errorElement = document.getElementById('volunteerCodeError');
+
+                // Hide previous error
+                errorElement.style.display = 'none';
+
+                // Validate volunteer code (you can change this validation logic)
+                if (this.validateVolunteerCode(volunteerCode)) {
+                    this.hideVolunteerCodeModal();
+                    
+                    // Set volunteer session data
+                    sessionStorage.setItem('loggedIn', 'true');
+                    sessionStorage.setItem('userName', 'Volunteer');
+                    sessionStorage.setItem('userEmail', 'volunteer@eventease.com');
+                    sessionStorage.setItem('role', 'volunteer');
+                    
+                    // Show success message briefly then redirect
+                    this.showSuccessModal(
+                        this.currentAction === 'login' ? 'Login successful' : 'Signup successful',
+                        'Welcome! Redirecting to volunteer dashboard...'
+                    );
+                    
+                    // Redirect to dashboard after a short delay
+                    setTimeout(() => {
+                        window.location.href = 'pages/dashboard.html';
+                    }, 2000);
+                } else {
+                    errorElement.style.display = 'block';
+                }
+            }
+
+            validateVolunteerCode(code) {
+                // Simple validation - you can modify this logic
+                // For demo purposes, accepting codes that are at least 4 characters
+                return code.length >= 4;
+            }
+        }
+
         // Initialize navigation authentication when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
             new NavigationAuth();
+            new RoleSelectionHandler();
         });
 
         // Listen for storage changes (when user logs in from another tab)
@@ -386,7 +598,7 @@
             }
         });
 
-        // Add CSS animations for notifications
+        // Add CSS animations for notifications and modals
         const style = document.createElement('style');
         style.textContent = `
             @keyframes slideInRight {
@@ -408,6 +620,209 @@
                 to {
                     transform: translateX(100%);
                     opacity: 0;
+                }
+            }
+
+            /* Modal Styles */
+            .modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+                animation: fadeIn 0.3s ease-out;
+            }
+
+            .modal-content {
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+                max-width: 400px;
+                width: 90%;
+                max-height: 90vh;
+                overflow-y: auto;
+                animation: slideInUp 0.3s ease-out;
+            }
+
+            .modal-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 24px 24px 0 24px;
+                border-bottom: 1px solid #e5e7eb;
+                margin-bottom: 24px;
+            }
+
+            .modal-header h3 {
+                margin: 0;
+                font-size: 20px;
+                font-weight: 600;
+                color: #1f2937;
+            }
+
+            .modal-close {
+                background: none;
+                border: none;
+                font-size: 24px;
+                color: #6b7280;
+                cursor: pointer;
+                padding: 0;
+                width: 32px;
+                height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 6px;
+                transition: all 0.2s ease;
+            }
+
+            .modal-close:hover {
+                background: #f3f4f6;
+                color: #374151;
+            }
+
+            .modal-body {
+                padding: 0 24px 24px 24px;
+            }
+
+            /* Role Selection Styles */
+            .role-options {
+                display: flex;
+                gap: 16px;
+                justify-content: center;
+            }
+
+            .role-btn {
+                background: white;
+                border: 2px solid #e5e7eb;
+                border-radius: 12px;
+                padding: 24px 20px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                min-width: 120px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .role-btn:hover {
+                border-color: #4a90e2;
+                background: #f8fafc;
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(74, 144, 226, 0.15);
+            }
+
+            .role-icon {
+                font-size: 32px;
+            }
+
+            .role-text {
+                font-size: 16px;
+                font-weight: 500;
+                color: #374151;
+            }
+
+            /* Form Styles */
+            .form-group {
+                margin-bottom: 24px;
+            }
+
+            .form-group label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 500;
+                color: #374151;
+            }
+
+            .form-group input {
+                width: 100%;
+                padding: 12px 16px;
+                border: 2px solid #e5e7eb;
+                border-radius: 8px;
+                font-size: 16px;
+                transition: border-color 0.2s ease;
+                box-sizing: border-box;
+            }
+
+            .form-group input:focus {
+                outline: none;
+                border-color: #4a90e2;
+                box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+            }
+
+            .error-message {
+                color: #dc2626;
+                font-size: 14px;
+                margin-top: 8px;
+                display: block;
+            }
+
+            .modal-actions {
+                display: flex;
+                gap: 12px;
+                justify-content: flex-end;
+            }
+
+            /* Success Modal Styles */
+            .success-modal .modal-body {
+                text-align: center;
+                padding: 40px 24px;
+            }
+
+            .success-icon {
+                font-size: 48px;
+                margin-bottom: 16px;
+            }
+
+            .success-modal h3 {
+                margin: 0 0 8px 0;
+                font-size: 24px;
+                font-weight: 600;
+                color: #059669;
+            }
+
+            .success-modal p {
+                margin: 0 0 24px 0;
+                color: #6b7280;
+                font-size: 16px;
+            }
+
+            /* Animations */
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+
+            @keyframes slideInUp {
+                from {
+                    transform: translateY(30px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+            }
+
+            /* Responsive Design */
+            @media (max-width: 480px) {
+                .modal-content {
+                    width: 95%;
+                    margin: 20px;
+                }
+                
+                .role-options {
+                    flex-direction: column;
+                }
+                
+                .role-btn {
+                    min-width: auto;
                 }
             }
         `;

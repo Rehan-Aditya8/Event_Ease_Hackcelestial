@@ -897,6 +897,7 @@ body {
     border-color: var(--primary-color);
     background: var(--bg-primary);
     box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    color: white;
 }
 
 .file-input {

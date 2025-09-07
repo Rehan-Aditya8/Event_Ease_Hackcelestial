@@ -27,24 +27,91 @@
       <a href="../landing.html" class="btn ghost" title="Home">Home</a>
       <button id="logoutBtn" class="btn ghost" title="Logout">Logout</button>
     </nav>
+    
   </header>
 
   <aside class="sidebar">
-    <button data-view="dashboard" class="nav-btn active">🏠 Home</button>
+    <button data-view="dashboard" class="nav-btn active">🏠 Dashboard</button>
     <button data-view="ticket" class="nav-btn"> 🎫 EasyEntry</button>
     <button data-view="announcements" class="nav-btn">📢 Announcements</button>
     <button data-view="lostfound" class="nav-btn">🔎 Lost & Found</button>
     <button data-view="emergency" class="nav-btn">🚨 Medical</button>
   </aside>
+  
 
   <main id="app">
     <section id="dashboard" class="view">
-      <h2 class="view-title">Welcome, <span id="userName">Attendee</span> 👋</h2>
-      <div class="grid cards">
-        <button class="card link" data-view="ticket"><div class="icon">🎫</div><div class="label">EasyEntry</div></button>
-        <button class="card link" data-view="announcements"><div class="icon">📢</div><div class="label">Announcements</div></button>
-        <button class="card link" data-view="lostfound"><div class="icon">🔎</div><div class="label">Lost & Found</div></button>
-        <button class="card link" data-view="emergency"><div class="icon">🚨</div><div class="label">Medical</div></button>
+      <!-- User Dashboard (Original Simple Layout) -->
+      <div id="user-dashboard">
+        <h2 class="view-title">Welcome, <span id="userName">Attendee</span> 👋</h2>
+        <div class="grid cards">
+          <button class="card link" data-view="ticket"><div class="icon">🎫</div><div class="label">EasyEntry</div></button>
+          <button class="card link" data-view="announcements"><div class="icon">📢</div><div class="label">Announcements</div></button>
+          <button class="card link" data-view="lostfound"><div class="icon">🔎</div><div class="label">Lost & Found</div></button>
+          <button class="card link" data-view="emergency"><div class="icon">🚨</div><div class="label">Medical</div></button>
+        </div>
+      </div>
+
+      
+      
+      <!-- Volunteer Dashboard (New Enhanced Layout) -->
+      <div id="volunteer-dashboard" class="hidden">
+        <h2 class="view-title">Welcome back, <span id="volunteerUserName">User</span>! 👋</h2>
+        <p class="view-subtitle">Manage your event experience with our comprehensive tools.</p>
+        
+        <!-- Status Cards -->
+        <div class="status-cards">
+          <div class="status-card">
+            <div class="status-icon">🎫</div>
+            <div class="status-content">
+              <div class="status-label">ENTRY STATUS</div>
+              <div class="status-value" id="entryStatus">Not Generated</div>
+            </div>
+          </div>
+          <div class="status-card">
+            <div class="status-icon">📢</div>
+            <div class="status-content">
+              <div class="status-label">ANNOUNCEMENTS</div>
+              <div class="status-value" id="announcementStatus">No New</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Action Cards -->
+        <div class="action-cards">
+          <button class="action-card" data-view="ticket">
+            <div class="action-icon">🎫</div>
+            <div class="action-content">
+              <div class="action-label">EasyEntry</div>
+              <div class="action-description">Scan QR codes and verify attendee tickets.</div>
+            </div>
+            <div class="action-arrow">→</div>
+          </button>
+          <button class="action-card" data-view="announcements">
+            <div class="action-icon">📢</div>
+            <div class="action-content">
+              <div class="action-label">Announcements</div>
+              <div class="action-description">Stay updated with event news.</div>
+            </div>
+            <div class="action-arrow">→</div>
+          </button>
+          <button class="action-card" data-view="lostfound">
+            <div class="action-icon">🔎</div>
+            <div class="action-content">
+              <div class="action-label">Lost & Found</div>
+              <div class="action-description">Report or find lost items.</div>
+            </div>
+            <div class="action-arrow">→</div>
+          </button>
+          <button class="action-card medical-emergency" data-view="emergency">
+            <div class="action-icon">🚨</div>
+            <div class="action-content">
+              <div class="action-label">Medical Emergency</div>
+              <div class="action-description">Get immediate medical assistance.</div>
+            </div>
+            <div class="action-arrow">→</div>
+          </button>
+        </div>
       </div>
     </section>
 
@@ -54,6 +121,7 @@
       </div>
       <h2 class="view-title">EasyEntry</h2>
       
+      <!-- User Section (Event Code Form) -->
       <div id="event-code-form" class="card">
         <h3>Enter Event Code</h3>
         <p class="muted">Please enter the 6-digit event code to generate your entry pass</p>
@@ -66,6 +134,7 @@
         </form>
       </div>
       
+      <!-- User QR Ticket Display -->
       <div id="qr-ticket" class="card ticket hidden">
         <div class="ticket-grid">
           <div>
@@ -81,15 +150,59 @@
         </div>
       </div>
       
-      <div id="volunteer-scanner" class="hidden">
-        <h3>Scan Attendee QR Code</h3>
-        <div class="scanner-container">
-          <video id="scanner-preview" class="scanner"></video>
-          <div class="scanner-overlay"></div>
+      <!-- Volunteer Section -->
+      <div id="volunteer-easyentry" class="hidden">
+        <div class="volunteer-options">
+          <div class="option-card">
+            <div class="option-icon">📱</div>
+            <h3>QR Code Scanner</h3>
+            <p>Scan attendee QR codes for quick entry verification</p>
+            <button id="start-qr-scanner" class="btn primary">Start QR Scanner</button>
+          </div>
+          
+          <div class="option-card">
+            <div class="option-icon">🎫</div>
+            <h3>Manual Ticket Entry</h3>
+            <p>Enter ticket ID manually for verification</p>
+            <button id="open-ticket-input" class="btn secondary">Enter Ticket ID</button>
+          </div>
         </div>
-        <div id="scan-result" class="scan-result hidden">
-          <div class="result-content"></div>
-          <button id="reset-scanner" class="btn primary">Scan Another</button>
+        
+        <!-- QR Scanner Section -->
+        <div id="volunteer-scanner" class="hidden">
+          <div class="scanner-header">
+            <h3>Scan Attendee QR Code</h3>
+            <button id="close-scanner" class="btn ghost">← Back to Options</button>
+          </div>
+          <div class="scanner-container">
+            <video id="scanner-preview" class="scanner"></video>
+            <div class="scanner-overlay"></div>
+          </div>
+          <div id="scan-result" class="scan-result hidden">
+            <div class="result-content"></div>
+            <button id="reset-scanner" class="btn primary">Scan Another</button>
+          </div>
+        </div>
+        
+        <!-- Manual Ticket Input Section -->
+        <div id="ticket-input-section" class="hidden">
+          <div class="ticket-input-header">
+            <h3>Manual Ticket Verification</h3>
+            <button id="close-ticket-input" class="btn ghost">← Back to Options</button>
+          </div>
+          <div class="card">
+            <form id="ticketInputForm" class="stack">
+              <label class="input">
+                <span>Ticket ID</span>
+                <input type="text" id="ticketIdInput" placeholder="Enter ticket ID" required />
+              </label>
+              <button class="btn primary" type="submit">Verify Ticket</button>
+            </form>
+            <div id="ticket-result" class="ticket-result hidden">
+              <div class="result-content"></div>
+              <button id="verify-another" class="btn primary">Verify Another</button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
