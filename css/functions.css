@@ -885,6 +885,7 @@ body {
 
 .chat-inputs input[type="text"] {
     padding: 0.875rem 1rem;
+    color: #ffffff;
     border: 2px solid var(--border-color);
     border-radius: var(--radius-md);
     font-size: 0.95rem;
