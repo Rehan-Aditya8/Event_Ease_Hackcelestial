@@ -100,7 +100,15 @@
                 </svg>
                 <span>Medical</span>
             </button>
-        </nav>
+            <button data-view="parking" class="nav-btn" onclick="event.preventDefault();">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 3h8a5 5 0 0 1 0 10H4z"/>
+        <line x1="4" y1="3" x2="4" y2="21"/>
+    </svg>
+    <span>Parking Management</span>
+</button>
+
+</button>
     </aside>
 
     <!-- Main Content -->
@@ -186,6 +194,24 @@
                         <div class="feature-content">
                             <h3>Lost & Found</h3>
                             <p>Report or find lost items</p>
+                        </div>
+                        <div class="feature-arrow">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9,18 15,12 9,6"/>
+                            </svg>
+                        </div>
+                    </button>
+
+                    <button class="feature-card" data-view="parking">
+                        <div class="feature-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="M21 21l-4.35-4.35"/>
+                            </svg>
+                        </div>
+                        <div class="feature-content">
+                            <h3>Parking Management</h3>
+                            <p>Locate parking spots and manage entry easily.</p>
                         </div>
                         <div class="feature-arrow">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

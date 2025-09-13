@@ -269,6 +269,7 @@ body {
 
 .btn.secondary {
   background: transparent;
+  /* color: black; */
   color: var(--text-primary);
   border: 2px solid var(--border);
 }
