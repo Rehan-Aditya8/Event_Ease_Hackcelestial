@@ -1,5 +1,11 @@
+// Import Firebase auth
+import { auth, db } from '../js/firebase.js';
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
 document.addEventListener('DOMContentLoaded', () => {
     const userNameSpan = document.getElementById('userName');
+    const userEmailSpan = document.getElementById('userEmail');
     const welcomeUserNameSpan = document.getElementById('welcomeUserName');
     const userAvatarImg = document.getElementById('userAvatar');
     const logoutBtn = document.getElementById('logoutBtn');
@@ -34,23 +40,63 @@ document.addEventListener('DOMContentLoaded', () => {
     // Toast Notification
     const toast = document.getElementById('toast');
 
-    // --- User Authentication and Display ---
-    function updateUserInfo() {
-        const user = JSON.parse(localStorage.getItem('loggedInUser'));
+    // --- Firebase User Authentication and Display ---
+    function updateUserInfo(user) {
         if (user) {
-            userNameSpan.textContent = user.username;
-            welcomeUserNameSpan.textContent = user.username;
-            userAvatarImg.src = user.avatar || 'https://via.placeholder.com/150/4A90E2/FFFFFF?text=U'; // Default avatar
-            ticketUserSpan.textContent = user.username;
+            // Get additional user data from Firestore
+            getDoc(doc(db, "users", user.uid))
+                .then((docSnap) => {
+                    if (docSnap.exists()) {
+                        const userData = docSnap.data();
+                        
+                        // Update UI with user information
+                        const displayName = user.displayName || userData.name || 'User';
+                        const userEmail = user.email || userData.email || '';
+                        
+                        // Display name and email separately
+                        userNameSpan.textContent = displayName;
+                        if (userEmailSpan) userEmailSpan.textContent = userEmail;
+                        welcomeUserNameSpan.textContent = displayName;
+                        userAvatarImg.src = user.photoURL || 'https://via.placeholder.com/150/4A90E2/FFFFFF?text=U';
+                        if (ticketUserSpan) ticketUserSpan.textContent = displayName;
+                        
+                        // Log user info for debugging
+                        console.log("User info:", { name: displayName, email: userEmail });
+                        
+                        showToast("Welcome back, " + displayName, "success");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error getting user data:", error);
+                });
         } else {
             // Redirect to login if no user is found
             window.location.href = '../pages/login.html';
         }
     }
+    
+    // Check authentication state
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // User is signed in
+            console.log("User authenticated:", user.email);
+            updateUserInfo(user);
+        } else {
+            // User is signed out
+            window.location.href = '../pages/login.html';
+        }
+    });
 
     logoutBtn.addEventListener('click', () => {
-        localStorage.removeItem('loggedInUser');
-        window.location.href = '../index.html';
+        signOut(auth).then(() => {
+            // Sign-out successful
+            showToast("Logged out successfully", "info");
+            window.location.href = '../index.html';
+        }).catch((error) => {
+            // An error happened
+            console.error("Error signing out:", error);
+            showToast("Error signing out", "error");
+        });
     });
 
     // --- View Management ---

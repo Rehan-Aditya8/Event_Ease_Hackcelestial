@@ -1,7 +1,13 @@
 /**
  * Signup Page JavaScript
  * Handles form interactions, animations, and user experience enhancements
+ * Integrated with Firebase Authentication
  */
+
+// Import Firebase auth
+import { auth, db } from '../js/firebase.js';
+import { createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+import { doc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 class SignupPage {
   constructor() {
@@ -10,6 +16,8 @@ class SignupPage {
     this.passwordToggle = document.getElementById("passwordToggle");
     this.toast = document.getElementById("toast");
     this.navToggle = document.getElementById("navToggle");
+    this.emailInput = document.getElementById("signupEmail");
+    this.nameInput = document.getElementById("signupName");
 
     this.init();
   }
@@ -247,7 +255,50 @@ class SignupPage {
     }
 
     if (isFormValid) {
-      this.submitForm();
+      // Get user data
+      const email = this.emailInput.value.trim();
+      const password = this.passwordInput.value.trim();
+      const displayName = this.nameInput.value.trim();
+      
+      // Create user with Firebase Authentication
+      createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          // User created successfully
+          const user = userCredential.user;
+          
+          // Update profile with display name
+          return updateProfile(user, {
+            displayName: displayName
+          });
+        })
+        .then(() => {
+          // Create user document in Firestore
+          const user = auth.currentUser;
+          return setDoc(doc(db, "users", user.uid), {
+            name: displayName,
+            email: email,
+            createdAt: new Date(),
+            events: []
+          });
+        })
+        .then(() => {
+          this.showToast("Account created successfully! Redirecting...", "success");
+          
+          // Redirect to dashboard
+          setTimeout(() => {
+            window.location.href = "functions.html";
+          }, 1500);
+        })
+        .catch((error) => {
+          // Handle errors
+          let errorMessage = "Failed to create account. Please try again.";
+          if (error.code === 'auth/email-already-in-use') {
+            errorMessage = "This email is already registered. Please use a different email or login.";
+          }
+          
+          this.showToast(errorMessage, "error");
+          console.error("Error creating account:", error);
+        });
     } else {
       this.showToast("Please fix the errors above", "error");
     }

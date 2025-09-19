@@ -6,6 +6,8 @@
   <title>EventEase – HackCelestial 2.0</title>
   <link rel="stylesheet" href="../css/style.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""/>
+  <!-- Firebase SDK -->
+  <script type="module" src="../js/firebase.js"></script>
 </head>
 <body>
   <header class="app-header">
@@ -44,6 +46,7 @@
       <!-- User Dashboard (Original Simple Layout) -->
       <div id="user-dashboard">
         <h2 class="view-title">Welcome, <span id="userName">Attendee</span> 👋</h2>
+        <p class="user-email">Email: <span id="userEmail">loading...</span></p>
         <div class="grid cards">
           <button class="card link" data-view="ticket"><div class="icon">🎫</div><div class="label">EasyEntry</div></button>
           <button class="card link" data-view="announcements"><div class="icon">📢</div><div class="label">Announcements</div></button>
