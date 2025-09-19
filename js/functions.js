@@ -27,6 +27,29 @@ document.addEventListener("DOMContentLoaded", () => {
   let userQRData = null;
   let activeEmergencies = [];
 
+  // Parking slots data
+  let parkingSlots = {
+    twoWheeler: { available: 45, total: 100 },
+    fourWheeler: { available: 23, total: 50 }
+  };
+
+  // Function to update parking slots display
+  function updateFunctionsParkingSlots() {
+    const twoWheelerElement = document.getElementById('functionsPageTwoWheelerSlots');
+    const fourWheelerElement = document.getElementById('functionsPageFourWheelerSlots');
+    
+    if (twoWheelerElement) {
+      twoWheelerElement.textContent = `${parkingSlots.twoWheeler.available}/${parkingSlots.twoWheeler.total}`;
+    }
+    
+    if (fourWheelerElement) {
+      fourWheelerElement.textContent = `${parkingSlots.fourWheeler.available}/${parkingSlots.fourWheeler.total}`;
+    }
+  }
+
+  // Initialize parking slots display
+  updateFunctionsParkingSlots();
+
   // ====== EASYENTRY FUNCTIONALITY ======
   function setupEasyEntryFunctionality() {
     const eventCodeForm = document.getElementById('eventCodeForm');
@@ -448,6 +471,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } else if (viewId === 'dashboard') {
         initDashboard();
+      } else if (viewId === 'parking') {
+        initParkingView();
+      } else if (viewId === 'volunteer-parking') {
+        const role = sessionStorage.getItem("role");
+        if (role === "volunteer") {
+          initVolunteerParkingView();
+        } else {
+          // Redirect non-volunteers back to dashboard
+          showView('dashboard');
+          return;
+        }
       }
     }
   }
@@ -931,4 +965,414 @@ if (logoutBtn) {
     });
   }
 }
+
+// ====== PARKING FUNCTIONALITY ======
+function initParkingView() {
+  // Update parking slots display
+  updateParkingSlots();
+  
+  // Initialize booking form
+  const bookingForm = document.getElementById('parkingBookingForm');
+  if (bookingForm) {
+    bookingForm.addEventListener('submit', handleParkingBooking);
+  }
+  
+  // Initialize vehicle type selection
+  const vehicleTypeInputs = document.querySelectorAll('input[name="vehicleType"]');
+  vehicleTypeInputs.forEach(input => {
+    input.addEventListener('change', updateAvailableSlots);
+  });
+  
+  // Initialize duration selection
+  const durationSelect = document.getElementById('duration');
+  if (durationSelect) {
+    durationSelect.addEventListener('change', updateBookingPrice);
+  }
+}
+
+function updateParkingSlots() {
+  // Update two-wheeler slots
+  const twoWheelerAvailable = document.getElementById('twoWheelerAvailable');
+  const twoWheelerTotal = document.getElementById('twoWheelerTotal');
+  if (twoWheelerAvailable) twoWheelerAvailable.textContent = parkingSlots.twoWheeler.available;
+  if (twoWheelerTotal) twoWheelerTotal.textContent = parkingSlots.twoWheeler.total;
+  
+  // Update four-wheeler slots
+  const fourWheelerAvailable = document.getElementById('fourWheelerAvailable');
+  const fourWheelerTotal = document.getElementById('fourWheelerTotal');
+  if (fourWheelerAvailable) fourWheelerAvailable.textContent = parkingSlots.fourWheeler.available;
+  if (fourWheelerTotal) fourWheelerTotal.textContent = parkingSlots.fourWheeler.total;
+  
+  // Update progress bars
+  const twoWheelerProgress = document.querySelector('.two-wheeler-progress');
+  const fourWheelerProgress = document.querySelector('.four-wheeler-progress');
+  
+  if (twoWheelerProgress) {
+    const twoWheelerPercentage = (parkingSlots.twoWheeler.available / parkingSlots.twoWheeler.total) * 100;
+    twoWheelerProgress.style.width = `${twoWheelerPercentage}%`;
+  }
+  
+  if (fourWheelerProgress) {
+    const fourWheelerPercentage = (parkingSlots.fourWheeler.available / parkingSlots.fourWheeler.total) * 100;
+    fourWheelerProgress.style.width = `${fourWheelerPercentage}%`;
+  }
+}
+
+function updateAvailableSlots() {
+  const selectedVehicleType = document.querySelector('input[name="vehicleType"]:checked');
+  const availableSlotsSpan = document.getElementById('availableSlots');
+  
+  if (selectedVehicleType && availableSlotsSpan) {
+    const vehicleType = selectedVehicleType.value;
+    if (vehicleType === 'two-wheeler') {
+      availableSlotsSpan.textContent = parkingSlots.twoWheeler.available;
+    } else if (vehicleType === 'four-wheeler') {
+      availableSlotsSpan.textContent = parkingSlots.fourWheeler.available;
+    }
+  }
+}
+
+function updateBookingPrice() {
+  const durationSelect = document.getElementById('duration');
+  const priceSpan = document.getElementById('bookingPrice');
+  
+  if (durationSelect && priceSpan) {
+    const duration = parseInt(durationSelect.value);
+    const selectedVehicleType = document.querySelector('input[name="vehicleType"]:checked');
+    
+    if (selectedVehicleType) {
+      const vehicleType = selectedVehicleType.value;
+      let hourlyRate = vehicleType === 'two-wheeler' ? 10 : 20; // ₹10 for 2-wheeler, ₹20 for 4-wheeler
+      let totalPrice = duration * hourlyRate;
+      
+      priceSpan.textContent = `₹${totalPrice}`;
+    }
+  }
+}
+
+function handleParkingBooking(event) {
+  event.preventDefault();
+  
+  const formData = new FormData(event.target);
+  const vehicleType = formData.get('vehicleType');
+  const vehicleNumber = formData.get('vehicleNumber');
+  const duration = parseInt(formData.get('duration'));
+  
+  // Check availability
+  const availableSlots = vehicleType === 'two-wheeler' ? 
+    parkingSlots.twoWheeler.available : parkingSlots.fourWheeler.available;
+  
+  if (availableSlots <= 0) {
+    showToast('No parking slots available for the selected vehicle type!', 'error');
+    return;
+  }
+  
+  // Generate slot number
+  const slotPrefix = vehicleType === 'two-wheeler' ? 'TW' : 'FW';
+  const slotNumber = `${slotPrefix}-${Math.floor(Math.random() * 100) + 1}`;
+  
+  // Calculate price
+  const hourlyRate = vehicleType === 'two-wheeler' ? 10 : 20;
+  const totalPrice = duration * hourlyRate;
+  
+  // Update available slots
+  if (vehicleType === 'two-wheeler') {
+    parkingSlots.twoWheeler.available--;
+  } else {
+    parkingSlots.fourWheeler.available--;
+  }
+  
+  // Update displays
+  updateParkingSlots();
+  updateFunctionsParkingSlots();
+  
+  // Show confirmation
+  showBookingConfirmation({
+    vehicleType,
+    vehicleNumber,
+    duration,
+    slotNumber,
+    totalPrice
+  });
+  
+  // Reset form
+  event.target.reset();
+  updateAvailableSlots();
+  updateBookingPrice();
+}
+
+function showBookingConfirmation(bookingData) {
+  const confirmationModal = document.getElementById('bookingConfirmation');
+  
+  // Update confirmation details
+  document.getElementById('confirmedVehicleType').textContent = 
+    bookingData.vehicleType === 'two-wheeler' ? 'Two Wheeler' : 'Four Wheeler';
+  document.getElementById('confirmedVehicleNumber').textContent = bookingData.vehicleNumber;
+  document.getElementById('confirmedSlotNumber').textContent = bookingData.slotNumber;
+  document.getElementById('confirmedDuration').textContent = `${bookingData.duration} hour(s)`;
+  document.getElementById('confirmedPrice').textContent = `₹${bookingData.totalPrice}`;
+  
+  // Set booking time
+  const now = new Date();
+  const bookingTime = now.toLocaleString();
+  document.getElementById('confirmedBookingTime').textContent = bookingTime;
+  
+  // Show modal
+  confirmationModal.classList.remove('hidden');
+  
+  // Show success toast
+  showToast('Parking slot booked successfully!', 'success');
+}
+
+// Close booking confirmation modal
+document.addEventListener('DOMContentLoaded', () => {
+  const closeConfirmationBtn = document.getElementById('closeBookingConfirmation');
+  const bookingConfirmationModal = document.getElementById('bookingConfirmation');
+  
+  if (closeConfirmationBtn && bookingConfirmationModal) {
+    closeConfirmationBtn.addEventListener('click', () => {
+      bookingConfirmationModal.classList.add('hidden');
+    });
+    
+    // Close modal when clicking outside
+    bookingConfirmationModal.addEventListener('click', (e) => {
+      if (e.target === bookingConfirmationModal) {
+        bookingConfirmationModal.classList.add('hidden');
+      }
+    });
+  }
+});
+
+// ===== VOLUNTEER PARKING MANAGEMENT =====
+
+// Initialize volunteer parking view
+function initVolunteerParkingView() {
+  updateVolunteerParkingStats();
+  loadActiveBookings();
+  setupVolunteerEventListeners();
+}
+
+// Update volunteer parking statistics
+function updateVolunteerParkingStats() {
+  // Two wheeler stats
+  const twoWheelerOccupied = 55;
+  const twoWheelerTotal = 100;
+  const twoWheelerAvailable = twoWheelerTotal - twoWheelerOccupied;
+  const twoWheelerPercentage = (twoWheelerOccupied / twoWheelerTotal) * 100;
+  
+  document.getElementById('volunteerTwoWheelerOccupied').textContent = twoWheelerOccupied;
+  document.getElementById('volunteerTwoWheelerAvailable').textContent = twoWheelerAvailable;
+  document.getElementById('volunteerTwoWheelerProgress').style.width = `${twoWheelerPercentage}%`;
+  
+  // Four wheeler stats
+  const fourWheelerOccupied = 27;
+  const fourWheelerTotal = 50;
+  const fourWheelerAvailable = fourWheelerTotal - fourWheelerOccupied;
+  const fourWheelerPercentage = (fourWheelerOccupied / fourWheelerTotal) * 100;
+  
+  document.getElementById('volunteerFourWheelerOccupied').textContent = fourWheelerOccupied;
+  document.getElementById('volunteerFourWheelerAvailable').textContent = fourWheelerAvailable;
+  document.getElementById('volunteerFourWheelerProgress').style.width = `${fourWheelerPercentage}%`;
+}
+
+// Load active bookings for volunteer view
+function loadActiveBookings() {
+  // This would typically fetch from a server
+  // For now, we'll use the existing sample data in the HTML
+  updateBookingTimers();
+}
+
+// Update booking timers in real-time
+function updateBookingTimers() {
+  const bookingItems = document.querySelectorAll('.booking-item');
+  
+  bookingItems.forEach(item => {
+    const timeRemainingElement = item.querySelector('.time-remaining');
+    const statusIndicator = item.querySelector('.status-indicator');
+    const statusText = item.querySelector('.status-text');
+    
+    if (timeRemainingElement) {
+      const currentTime = timeRemainingElement.textContent;
+      
+      // Simulate time countdown (in a real app, this would be calculated from actual booking time)
+      if (currentTime.includes('15m')) {
+        statusIndicator.className = 'status-indicator expiring';
+        statusText.textContent = 'Expiring Soon';
+      } else if (currentTime.includes('h')) {
+        statusIndicator.className = 'status-indicator active';
+        statusText.textContent = 'Active';
+      }
+    }
+  });
+}
+
+// Setup event listeners for volunteer parking
+function setupVolunteerEventListeners() {
+  // Refresh bookings button
+  const refreshBtn = document.getElementById('refreshBookings');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => {
+      refreshBtn.disabled = true;
+      refreshBtn.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spinning">
+          <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+          <path d="M21 3v5h-5"/>
+          <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+          <path d="M3 21v-5h5"/>
+        </svg>
+        Refreshing...
+      `;
+      
+      setTimeout(() => {
+        loadActiveBookings();
+        updateVolunteerParkingStats();
+        refreshBtn.disabled = false;
+        refreshBtn.innerHTML = `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+            <path d="M21 3v5h-5"/>
+            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+            <path d="M3 21v-5h5"/>
+          </svg>
+          Refresh
+        `;
+        showToast('Bookings refreshed successfully!', 'success');
+      }, 1500);
+    });
+  }
+  
+  // Filter tabs
+  const filterTabs = document.querySelectorAll('.filter-tab');
+  filterTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      // Remove active class from all tabs
+      filterTabs.forEach(t => t.classList.remove('active'));
+      // Add active class to clicked tab
+      tab.classList.add('active');
+      
+      const filter = tab.dataset.filter;
+      filterBookings(filter);
+    });
+  });
+  
+  // Booking action buttons
+  setupBookingActions();
+}
+
+// Filter bookings based on selected filter
+function filterBookings(filter) {
+  const bookingItems = document.querySelectorAll('.booking-item');
+  
+  bookingItems.forEach(item => {
+    let shouldShow = true;
+    
+    switch (filter) {
+      case 'all':
+        shouldShow = true;
+        break;
+      case 'two-wheeler':
+        shouldShow = item.classList.contains('two-wheeler');
+        break;
+      case 'four-wheeler':
+        shouldShow = item.classList.contains('four-wheeler');
+        break;
+      case 'expiring':
+        shouldShow = item.querySelector('.status-indicator').classList.contains('expiring');
+        break;
+    }
+    
+    item.style.display = shouldShow ? 'flex' : 'none';
+  });
+}
+
+// Setup booking action buttons (extend, cancel)
+function setupBookingActions() {
+  const extendButtons = document.querySelectorAll('.btn-action.extend');
+  const cancelButtons = document.querySelectorAll('.btn-action.cancel');
+  
+  extendButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const bookingItem = btn.closest('.booking-item');
+      const vehicleNumber = bookingItem.querySelector('h4').textContent;
+      extendBooking(vehicleNumber, bookingItem);
+    });
+  });
+  
+  cancelButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const bookingItem = btn.closest('.booking-item');
+      const vehicleNumber = bookingItem.querySelector('h4').textContent;
+      cancelBooking(vehicleNumber, bookingItem);
+    });
+  });
+}
+
+// Extend booking functionality
+function extendBooking(vehicleNumber, bookingItem) {
+  if (confirm(`Extend booking for vehicle ${vehicleNumber}?`)) {
+    const timeRemainingElement = bookingItem.querySelector('.time-remaining');
+    const currentTime = timeRemainingElement.textContent;
+    
+    // Simulate extending by 1 hour
+    let newTime;
+    if (currentTime.includes('15m')) {
+      newTime = '1h 15m left';
+    } else if (currentTime.includes('1h 45m')) {
+      newTime = '2h 45m left';
+    } else if (currentTime.includes('3h 30m')) {
+      newTime = '4h 30m left';
+    }
+    
+    timeRemainingElement.textContent = newTime;
+    
+    // Update status if it was expiring
+    const statusIndicator = bookingItem.querySelector('.status-indicator');
+    const statusText = bookingItem.querySelector('.status-text');
+    if (statusIndicator.classList.contains('expiring')) {
+      statusIndicator.className = 'status-indicator active';
+      statusText.textContent = 'Active';
+    }
+    
+    showToast(`Booking extended for ${vehicleNumber}`, 'success');
+  }
+}
+
+// Cancel booking functionality
+function cancelBooking(vehicleNumber, bookingItem) {
+  if (confirm(`Cancel booking for vehicle ${vehicleNumber}? This action cannot be undone.`)) {
+    bookingItem.style.opacity = '0.5';
+    bookingItem.style.pointerEvents = 'none';
+    
+    setTimeout(() => {
+      bookingItem.remove();
+      updateVolunteerParkingStats();
+      showToast(`Booking cancelled for ${vehicleNumber}`, 'info');
+    }, 500);
+  }
+}
+
+// Initialize volunteer parking when the view is shown
+document.addEventListener('DOMContentLoaded', () => {
+  // Check if volunteer parking section exists
+  const volunteerParkingSection = document.getElementById('volunteer-parking');
+  if (volunteerParkingSection) {
+    // Initialize when volunteer parking view becomes visible
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          if (!volunteerParkingSection.classList.contains('hidden')) {
+            initVolunteerParkingView();
+            // Start timer updates
+            setInterval(updateBookingTimers, 60000); // Update every minute
+          }
+        }
+      });
+    });
+    
+    observer.observe(volunteerParkingSection, { attributes: true });
+  }
+});
+
 });

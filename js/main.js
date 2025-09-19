@@ -740,16 +740,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const ticketUserEl = document.getElementById("ticketUser");
     const userDashboard = document.getElementById("user-dashboard");
     const volunteerDashboard = document.getElementById("volunteer-dashboard");
+    const volunteerParkingCard = document.getElementById("volunteer-parking-card");
 
     // Show appropriate dashboard based on role
     if (role === "volunteer") {
       if (userDashboard) userDashboard.classList.add("hidden");
       if (volunteerDashboard) volunteerDashboard.classList.remove("hidden");
       if (volunteerUserNameEl) volunteerUserNameEl.textContent = `${name}`;
+      
+      // Show volunteer parking card for volunteers only
+      if (volunteerParkingCard) {
+        volunteerParkingCard.style.display = "block";
+      }
     } else {
       if (userDashboard) userDashboard.classList.remove("hidden");
       if (volunteerDashboard) volunteerDashboard.classList.add("hidden");
       if (userNameEl) userNameEl.textContent = `${name}`;
+      
+      // Hide volunteer parking card for regular users
+      if (volunteerParkingCard) {
+        volunteerParkingCard.style.display = "none";
+      }
     }
     
     if (ticketUserEl) ticketUserEl.textContent = name;

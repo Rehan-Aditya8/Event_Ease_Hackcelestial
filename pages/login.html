@@ -489,18 +489,48 @@
             }
 
             setUserSession(user) {
+                // Determine user role based on email or user data
+                const role = this.determineUserRole(user);
+                
                 const sessionData = {
                     user: {
                         id: user.id,
                         name: user.name,
                         email: user.email,
-                        avatar: user.avatar || this.generateAvatar(user.name)
+                        avatar: user.avatar || this.generateAvatar(user.name),
+                        role: role
                     },
                     loginTime: new Date().toISOString(),
                     isLoggedIn: true
                 };
                 
                 localStorage.setItem('eventease_session', JSON.stringify(sessionData));
+                
+                // Set role in sessionStorage for compatibility with existing system
+                sessionStorage.setItem('role', role);
+            }
+
+            determineUserRole(user) {
+                // Check if user has explicit role set
+                if (user.role) {
+                    return user.role;
+                }
+                
+                // Check for volunteer email patterns
+                const volunteerPatterns = [
+                    /volunteer@/i,
+                    /admin@/i,
+                    /staff@/i,
+                    /organizer@/i,
+                    /volunteer\./i,
+                    /admin\./i
+                ];
+                
+                const isVolunteer = volunteerPatterns.some(pattern => 
+                    pattern.test(user.email)
+                );
+                
+                return isVolunteer ? 'volunteer' : 'user';
             }
 
             generateAvatar(name) {

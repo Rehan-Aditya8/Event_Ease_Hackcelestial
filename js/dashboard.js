@@ -31,6 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatNameInput = document.getElementById('chatName');
     const chatMessageInput = document.getElementById('chatMessage');
     const chatImageInput = document.getElementById('chatImage');
+    
+    // Volunteer Lost & Found elements
+    const volunteerChatBox = document.getElementById('volunteerChatBox');
+    const volunteerChatForm = document.getElementById('volunteerChatForm');
+    const volunteerChatNameInput = document.getElementById('volunteerChatName');
+    const volunteerChatMessageInput = document.getElementById('volunteerChatMessage');
+    const volunteerChatImageInput = document.getElementById('volunteerChatImage');
 
     // Medical elements
     const sosButton = document.getElementById('sos-button');
@@ -219,6 +226,26 @@ document.addEventListener('DOMContentLoaded', () => {
         chatBox.scrollTop = chatBox.scrollHeight; // Scroll to bottom
     }
 
+    function renderVolunteerChatMessages() {
+        if (volunteerChatBox) {
+            volunteerChatBox.innerHTML = '';
+            chatMessages.forEach(msg => {
+                const msgDiv = document.createElement('div');
+                msgDiv.classList.add('chat-message');
+                if (msg.sender === userNameSpan.textContent) {
+                    msgDiv.classList.add('self');
+                }
+                msgDiv.innerHTML = `
+                    <div class="message-meta">${msg.sender} - ${new Date(msg.timestamp).toLocaleString()}</div>
+                    <div class="message-content">${msg.message}</div>
+                    ${msg.image ? `<img src="${msg.image}" alt="Chat Image" />` : ''}
+                `;
+                volunteerChatBox.appendChild(msgDiv);
+            });
+            volunteerChatBox.scrollTop = volunteerChatBox.scrollHeight; // Scroll to bottom
+        }
+    }
+
     chatForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const sender = chatNameInput.value || userNameSpan.textContent;
@@ -232,6 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 imageUrl = e.target.result;
                 chatMessages.push({ sender, message, image: imageUrl, timestamp: new Date().toISOString() });
                 renderChatMessages();
+                renderVolunteerChatMessages();
                 chatMessageInput.value = '';
                 chatImageInput.value = '';
             };
@@ -239,11 +267,43 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (message.trim() !== '') {
             chatMessages.push({ sender, message, image: imageUrl, timestamp: new Date().toISOString() });
             renderChatMessages();
+            renderVolunteerChatMessages();
             chatMessageInput.value = '';
         } else {
             showToast('Please enter a message or select an image.', 'error');
         }
     });
+
+    // Volunteer chat form event listener
+    if (volunteerChatForm) {
+        volunteerChatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const sender = volunteerChatNameInput.value || userNameSpan.textContent;
+            const message = volunteerChatMessageInput.value;
+            const imageFile = volunteerChatImageInput.files[0];
+            let imageUrl = '';
+
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imageUrl = e.target.result;
+                    chatMessages.push({ sender, message, image: imageUrl, timestamp: new Date().toISOString() });
+                    renderChatMessages();
+                    renderVolunteerChatMessages();
+                    volunteerChatMessageInput.value = '';
+                    volunteerChatImageInput.value = '';
+                };
+                reader.readAsDataURL(imageFile);
+            } else if (message.trim() !== '') {
+                chatMessages.push({ sender, message, image: imageUrl, timestamp: new Date().toISOString() });
+                renderChatMessages();
+                renderVolunteerChatMessages();
+                volunteerChatMessageInput.value = '';
+            } else {
+                showToast('Please enter a message or select an image.', 'error');
+            }
+        });
+    }
 
     // --- Medical Emergency Functionality ---
     let userMap = null;
@@ -306,6 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
     showView('overview'); // Default view
     renderAnnouncements();
     renderChatMessages();
+    renderVolunteerChatMessages();
     initUserMap();
 });
 
