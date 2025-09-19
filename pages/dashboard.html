@@ -50,67 +50,312 @@
           <button class="card link" data-view="lostfound"><div class="icon">🔎</div><div class="label">Lost & Found</div></button>
           <button class="card link" data-view="emergency"><div class="icon">🚨</div><div class="label">Medical</div></button>
         </div>
+        
+        <!-- Volunteer Parking Management Section (Initially Hidden) -->
+        <div id="volunteer-parking-section" class="parking-management-section hidden">
+          <div class="view-header">
+            <button class="back-btn" onclick="toggleParkingSection()">← Back to Dashboard</button>
+            <h2>Parking Management - Volunteer Dashboard</h2>
+            <p>Manage parking slots and bookings for event attendees</p>
+          </div>
+          
+          <!-- Parking Overview Stats -->
+          <div class="parking-overview">
+            <div class="stat-card">
+              <div class="stat-icon">🚗</div>
+              <div class="stat-content">
+                <div class="stat-number" id="totalSlots">150</div>
+                <div class="stat-label">Total Slots</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">✅</div>
+              <div class="stat-content">
+                <div class="stat-number" id="occupiedSlots">87</div>
+                <div class="stat-label">Occupied</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">🟢</div>
+              <div class="stat-content">
+                <div class="stat-number" id="availableSlots">63</div>
+                <div class="stat-label">Available</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">💰</div>
+              <div class="stat-content">
+                <div class="stat-number" id="todayRevenue">₹12,450</div>
+                <div class="stat-label">Today's Revenue</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Active Bookings Management -->
+          <div class="active-bookings">
+            <div class="section-header">
+              <h3>Active Bookings</h3>
+              <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="all">All</button>
+                <button class="filter-tab" data-filter="checked-in">Checked In</button>
+                <button class="filter-tab" data-filter="pending">Pending</button>
+                <button class="filter-tab" data-filter="expired">Expired</button>
+              </div>
+            </div>
+            
+            <div class="bookings-list" id="activeBookingsList">
+              <!-- Booking items will be populated by JavaScript -->
+              <div class="booking-item">
+                <div class="booking-info">
+                  <div class="booking-id">#PK001</div>
+                  <div class="vehicle-info">
+                    <span class="vehicle-type">🚗 Car</span>
+                    <span class="vehicle-number">MH 12 AB 1234</span>
+                  </div>
+                  <div class="booking-details">
+                    <span class="slot">Slot A-15</span>
+                    <span class="duration">2 hours</span>
+                    <span class="amount">₹100</span>
+                  </div>
+                </div>
+                <div class="booking-actions">
+                  <button class="btn-check-in">Check In</button>
+                  <button class="btn-extend">Extend</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Real-Time Parking Slot Monitor -->
+          <div class="parking-monitor">
+            <div class="section-header">
+              <h3>🔴 Live Parking Monitor</h3>
+              <div class="monitor-controls">
+                <button class="refresh-btn" onclick="refreshParkingData()">🔄 Refresh</button>
+                <div class="auto-refresh">
+                  <input type="checkbox" id="autoRefresh" checked>
+                  <label for="autoRefresh">Auto-refresh (30s)</label>
+                </div>
+              </div>
+            </div>
+            
+            <div class="parking-grid">
+              <div class="parking-section">
+                <h4>Section A - Two Wheelers</h4>
+                <div class="slot-grid two-wheeler">
+                  <div class="slot available" data-slot="A1">A1</div>
+                  <div class="slot occupied" data-slot="A2">A2</div>
+                  <div class="slot available" data-slot="A3">A3</div>
+                  <div class="slot reserved" data-slot="A4">A4</div>
+                  <div class="slot maintenance" data-slot="A5">A5</div>
+                  <div class="slot available" data-slot="A6">A6</div>
+                  <div class="slot occupied" data-slot="A7">A7</div>
+                  <div class="slot available" data-slot="A8">A8</div>
+                </div>
+              </div>
+              
+              <div class="parking-section">
+                <h4>Section B - Four Wheelers</h4>
+                <div class="slot-grid four-wheeler">
+                  <div class="slot occupied" data-slot="B1">B1</div>
+                  <div class="slot available" data-slot="B2">B2</div>
+                  <div class="slot occupied" data-slot="B3">B3</div>
+                  <div class="slot available" data-slot="B4">B4</div>
+                  <div class="slot reserved" data-slot="B5">B5</div>
+                  <div class="slot available" data-slot="B6">B6</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Attendee Assistance Panel -->
+          <div class="attendee-assistance">
+            <div class="section-header">
+              <h3>👥 Attendee Assistance</h3>
+            </div>
+            
+            <div class="assistance-tools">
+              <div class="tool-card">
+                <div class="tool-icon">🔍</div>
+                <div class="tool-content">
+                  <h4>Find Parking</h4>
+                  <p>Help attendees find available parking slots</p>
+                  <button class="tool-btn" onclick="showParkingFinder()">Open Finder</button>
+                </div>
+              </div>
+              
+              <div class="tool-card">
+                <div class="tool-icon">🚗</div>
+                <div class="tool-content">
+                  <h4>Vehicle Lookup</h4>
+                  <p>Search for parked vehicles by number plate</p>
+                  <div class="lookup-form">
+                    <input type="text" placeholder="Enter vehicle number" id="vehicleSearch">
+                    <button onclick="searchVehicle()">Search</button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="tool-card">
+                <div class="tool-icon">⚠️</div>
+                <div class="tool-content">
+                  <h4>Report Issue</h4>
+                  <p>Report parking violations or issues</p>
+                  <button class="tool-btn alert" onclick="reportIssue()">Report Issue</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Manual Override Controls -->
+          <div class="manual-controls">
+            <div class="section-header">
+              <h3>⚡ Manual Override</h3>
+              <p class="warning">Use these controls only in emergency situations</p>
+            </div>
+            
+            <div class="override-actions">
+              <button class="override-btn emergency" onclick="emergencySlotRelease()">
+                <span class="btn-icon">🚨</span>
+                Emergency Slot Release
+              </button>
+              <button class="override-btn" onclick="forceCheckOut()">
+                <span class="btn-icon">🔓</span>
+                Force Check-out
+              </button>
+              <button class="override-btn" onclick="blockSlot()">
+                <span class="btn-icon">🚫</span>
+                Block Slot
+              </button>
+              <button class="override-btn" onclick="overridePayment()">
+                <span class="btn-icon">💳</span>
+                Override Payment
+              </button>
+            </div>
+          </div>
+
+          <!-- Communication Center -->
+          <div class="communication-center">
+            <div class="section-header">
+              <h3>📞 Communication Center</h3>
+            </div>
+            
+            <div class="comm-tools">
+              <div class="comm-card">
+                <div class="comm-icon">📱</div>
+                <div class="comm-content">
+                  <h4>Contact Attendee</h4>
+                  <div class="contact-form">
+                    <input type="text" placeholder="Vehicle number or booking ID" id="contactSearch">
+                    <button onclick="contactAttendee()">Contact</button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="comm-card">
+                <div class="comm-icon">🛡️</div>
+                <div class="comm-content">
+                  <h4>Security Alert</h4>
+                  <button class="security-btn" onclick="alertSecurity()">Alert Security</button>
+                </div>
+              </div>
+              
+              <div class="comm-card">
+                <div class="comm-icon">📢</div>
+                <div class="comm-content">
+                  <h4>Broadcast Message</h4>
+                  <textarea placeholder="Type announcement..." id="broadcastMsg"></textarea>
+                  <button onclick="broadcastMessage()">Send to All</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Volunteer Shift Analytics -->
+          <div class="shift-analytics">
+            <div class="section-header">
+              <h3>📊 Shift Analytics</h3>
+            </div>
+            
+            <div class="analytics-grid">
+              <div class="analytics-card">
+                <div class="metric-icon">👥</div>
+                <div class="metric-content">
+                  <div class="metric-number">47</div>
+                  <div class="metric-label">Vehicles Assisted</div>
+                </div>
+              </div>
+              
+              <div class="analytics-card">
+                <div class="metric-icon">⏱️</div>
+                <div class="metric-content">
+                  <div class="metric-number">3.2 min</div>
+                  <div class="metric-label">Avg Response Time</div>
+                </div>
+              </div>
+              
+              <div class="analytics-card">
+                <div class="metric-icon">✅</div>
+                <div class="metric-content">
+                  <div class="metric-number">12</div>
+                  <div class="metric-label">Issues Resolved</div>
+                </div>
+              </div>
+              
+              <div class="analytics-card">
+                <div class="metric-icon">⭐</div>
+                <div class="metric-content">
+                  <div class="metric-number">4.8/5</div>
+                  <div class="metric-label">Satisfaction Rating</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="shift-actions">
+              <button class="shift-btn" onclick="exportShiftReport()">
+                <span class="btn-icon">📄</span>
+                Export Shift Report
+              </button>
+              <button class="shift-btn" onclick="logIncident()">
+                <span class="btn-icon">📝</span>
+                Log Incident
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="quick-actions">
+            <button class="action-btn" onclick="showBookingForm()">
+              <span class="btn-icon">➕</span>
+              New Booking
+            </button>
+            <button class="action-btn" onclick="showCheckInForm()">
+              <span class="btn-icon">📝</span>
+              Manual Check-in
+            </button>
+            <button class="action-btn" onclick="showSlotManagement()">
+              <span class="btn-icon">🏗️</span>
+              Manage Slots
+            </button>
+            <button class="action-btn" onclick="generateReport()">
+              <span class="btn-icon">📊</span>
+              Generate Report
+            </button>
+          </div>
+        </div>
       </div>
 
       
       
-      <!-- Volunteer Dashboard (New Enhanced Layout) -->
+      <!-- Volunteer Dashboard (Same UI as User Dashboard) -->
       <div id="volunteer-dashboard" class="hidden">
-        <h2 class="view-title">Welcome back, <span id="volunteerUserName">User</span>! 👋</h2>
-        <p class="view-subtitle">Manage your event experience with our comprehensive tools.</p>
-        
-        <!-- Status Cards -->
-        <div class="status-cards">
-          <div class="status-card">
-            <div class="status-icon">🎫</div>
-            <div class="status-content">
-              <div class="status-label">ENTRY STATUS</div>
-              <div class="status-value" id="entryStatus">Not Generated</div>
-            </div>
-          </div>
-          <div class="status-card">
-            <div class="status-icon">📢</div>
-            <div class="status-content">
-              <div class="status-label">ANNOUNCEMENTS</div>
-              <div class="status-value" id="announcementStatus">No New</div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Action Cards -->
-        <div class="action-cards">
-          <button class="action-card" data-view="ticket">
-            <div class="action-icon">🎫</div>
-            <div class="action-content">
-              <div class="action-label">EasyEntry</div>
-              <div class="action-description">Scan QR codes and verify attendee tickets.</div>
-            </div>
-            <div class="action-arrow">→</div>
-          </button>
-          <button class="action-card" data-view="announcements">
-            <div class="action-icon">📢</div>
-            <div class="action-content">
-              <div class="action-label">Announcements</div>
-              <div class="action-description">Stay updated with event news.</div>
-            </div>
-            <div class="action-arrow">→</div>
-          </button>
-          <button class="action-card" data-view="lostfound">
-            <div class="action-icon">🔎</div>
-            <div class="action-content">
-              <div class="action-label">Lost & Found</div>
-              <div class="action-description">Report or find lost items.</div>
-            </div>
-            <div class="action-arrow">→</div>
-          </button>
-          <button class="action-card medical-emergency" data-view="emergency">
-            <div class="action-icon">🚨</div>
-            <div class="action-content">
-              <div class="action-label">Medical Emergency</div>
-              <div class="action-description">Get immediate medical assistance.</div>
-            </div>
-            <div class="action-arrow">→</div>
-          </button>
+        <h2 class="view-title">Welcome, <span id="volunteerUserName">Volunteer</span> 👋</h2>
+        <div class="grid cards">
+          <button class="card link" data-view="ticket"><div class="icon">🎫</div><div class="label">EasyEntry</div></button>
+          <button class="card link" data-view="announcements"><div class="icon">📢</div><div class="label">Announcements</div></button>
+          <button class="card link" data-view="lostfound"><div class="icon">🔎</div><div class="label">Lost & Found</div></button>
+          <button class="card link" id="volunteer-parking-card" onclick="toggleParkingSection()"><div class="icon">🚗</div><div class="label">Volunteer Parking</div></button>
+          <button class="card link" data-view="emergency"><div class="icon">🚨</div><div class="label">Medical</div></button>
         </div>
       </div>
     </section>
@@ -266,6 +511,8 @@
   </form>
 </section>
 
+
+    <!-- Old volunteer parking section removed - now integrated into volunteer dashboard -->
 
     <section id="emergency" class="view hidden">
       <div class="crumbs">

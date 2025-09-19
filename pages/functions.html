@@ -205,13 +205,24 @@
                     <button class="feature-card" data-view="parking">
                         <div class="feature-icon">
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="11" cy="11" r="8"/>
-                                <path d="M21 21l-4.35-4.35"/>
+                                <rect x="3" y="6" width="18" height="12" rx="2"/>
+                                <path d="M7 11h2v2H7z"/>
+                                <path d="M15 11h2v2h-2z"/>
                             </svg>
                         </div>
                         <div class="feature-content">
                             <h3>Parking Management</h3>
                             <p>Locate parking spots and manage entry easily.</p>
+                            <div class="parking-availability">
+                                <div class="availability-item">
+                                    <span class="vehicle-type">🏍️ Two Wheeler</span>
+                                    <span class="slot-count" id="functionsPageTwoWheelerSlots">45/100</span>
+                                </div>
+                                <div class="availability-item">
+                                    <span class="vehicle-type">🚗 Four Wheeler</span>
+                                    <span class="slot-count" id="functionsPageFourWheelerSlots">23/50</span>
+                                </div>
+                            </div>
                         </div>
                         <div class="feature-arrow">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -539,6 +550,815 @@
                             Center on Navi Mumbai
                         </button>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Parking Management View -->
+        <section id="parking" class="view hidden">
+            <div class="view-header">
+                <button type="button" class="btn ghost back-btn" data-view="dashboard">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15,18 9,12 15,6"/>
+                    </svg>
+                    Back to Dashboard
+                </button>
+                <h1 class="view-title">Parking Management</h1>
+                <p class="view-subtitle">Find and book your parking spot easily</p>
+            </div>
+            
+            <!-- Parking Slots Overview -->
+            <div class="content-card parking-overview">
+                <div class="card-header">
+                    <h3>Available Parking Slots</h3>
+                    <p>Real-time parking availability</p>
+                </div>
+                <div class="parking-stats">
+                    <div class="stat-item two-wheeler">
+                        <div class="stat-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="6" cy="19" r="3"/>
+                                <circle cx="18" cy="19" r="3"/>
+                                <path d="M9 19h6"/>
+                                <path d="M12 19V8"/>
+                                <path d="M8 8h8"/>
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <h4>Two Wheeler</h4>
+                            <div class="slot-display">
+                                <span class="available" id="parkingTwoWheelerAvailable">45</span>
+                                <span class="separator">/</span>
+                                <span class="total">100</span>
+                            </div>
+                            <p class="status available">Available</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item four-wheeler">
+                        <div class="stat-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="7" cy="17" r="2"/>
+                                <circle cx="17" cy="17" r="2"/>
+                                <path d="M5 17h-2v-6l2-5h9l4 5v6h-2"/>
+                                <path d="M7 10h8"/>
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <h4>Four Wheeler</h4>
+                            <div class="slot-display">
+                                <span class="available" id="parkingFourWheelerAvailable">23</span>
+                                <span class="separator">/</span>
+                                <span class="total">50</span>
+                            </div>
+                            <p class="status available">Available</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Form -->
+            <div class="content-card booking-form">
+                <div class="card-header">
+                    <h3>Book Your Parking Slot</h3>
+                    <p>Select your vehicle type and duration</p>
+                </div>
+                
+                <form id="parkingBookingForm" class="form-stack">
+                    <div class="input-group">
+                        <label>Vehicle Type</label>
+                        <div class="vehicle-selection">
+                            <label class="vehicle-option">
+                                <input type="radio" name="vehicleType" value="twoWheeler" required>
+                                <div class="option-content">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="6" cy="19" r="3"/>
+                                        <circle cx="18" cy="19" r="3"/>
+                                        <path d="M9 19h6"/>
+                                        <path d="M12 19V8"/>
+                                        <path d="M8 8h8"/>
+                                    </svg>
+                                    <span>Two Wheeler</span>
+                                    <small>₹20/hour</small>
+                                </div>
+                            </label>
+                            <label class="vehicle-option">
+                                <input type="radio" name="vehicleType" value="fourWheeler" required>
+                                <div class="option-content">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="7" cy="17" r="2"/>
+                                        <circle cx="17" cy="17" r="2"/>
+                                        <path d="M5 17h-2v-6l2-5h9l4 5v6h-2"/>
+                                        <path d="M7 10h8"/>
+                                    </svg>
+                                    <span>Four Wheeler</span>
+                                    <small>₹50/hour</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="vehicleNumber">Vehicle Number</label>
+                        <input type="text" id="vehicleNumber" placeholder="e.g., MH 04 AB 1234" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="duration">Parking Duration</label>
+                        <select id="duration" required>
+                            <option value="">Select duration</option>
+                            <option value="1">1 Hour</option>
+                            <option value="2">2 Hours</option>
+                            <option value="3">3 Hours</option>
+                            <option value="4">4 Hours</option>
+                            <option value="6">6 Hours</option>
+                            <option value="8">8 Hours</option>
+                            <option value="fullday">Full Day (20% discount)</option>
+                        </select>
+                    </div>
+
+                    <div class="pricing-info">
+                        <div class="price-breakdown">
+                            <div class="price-item">
+                                <span>Base Rate:</span>
+                                <span id="baseRate">₹0</span>
+                            </div>
+                            <div class="price-item discount hidden">
+                                <span>Discount:</span>
+                                <span id="discount">₹0</span>
+                            </div>
+                            <div class="price-item total">
+                                <span>Total Amount:</span>
+                                <span id="totalAmount">₹0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn primary full-width">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 12l2 2 4-4"/>
+                            <circle cx="12" cy="12" r="9"/>
+                        </svg>
+                        Book Parking Slot
+                    </button>
+                </form>
+            </div>
+
+            <!-- Booking Confirmation -->
+            <div id="bookingConfirmation" class="content-card booking-confirmation hidden">
+                <div class="card-header success">
+                    <div class="success-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 12l2 2 4-4"/>
+                            <circle cx="12" cy="12" r="9"/>
+                        </svg>
+                    </div>
+                    <h3>Booking Confirmed!</h3>
+                    <p>Your parking slot has been reserved</p>
+                </div>
+                
+                <div class="booking-details">
+                    <div class="detail-item">
+                        <label>Slot Number:</label>
+                        <span id="confirmedSlotNumber" class="highlight">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Vehicle Type:</label>
+                        <span id="confirmedVehicleType">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Vehicle Number:</label>
+                        <span id="confirmedVehicleNumber">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Duration:</label>
+                        <span id="confirmedDuration">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Amount Paid:</label>
+                        <span id="confirmedAmount" class="highlight">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Valid Until:</label>
+                        <span id="confirmedValidUntil">-</span>
+                    </div>
+                </div>
+
+                <div class="confirmation-actions">
+                    <button id="newBookingBtn" class="btn primary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="16"/>
+                            <line x1="8" y1="12" x2="16" y2="12"/>
+                        </svg>
+                        Book Another Slot
+                    </button>
+                    <button data-view="dashboard" class="btn ghost">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        </svg>
+                        Back to Dashboard
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Volunteer Parking Management Section -->
+        <section id="volunteer-parking" class="view hidden">
+            <div class="view-header">
+                <h2>Parking Management - Volunteer Dashboard</h2>
+                <p>Monitor and manage parking slots and bookings</p>
+            </div>
+
+            <!-- Parking Overview for Volunteers -->
+            <div class="content-card parking-overview-volunteer">
+                <div class="card-header">
+                    <h3>Parking Slots Overview</h3>
+                    <p>Real-time parking availability and occupancy</p>
+                </div>
+                
+                <div class="parking-stats-grid">
+                    <div class="stat-item two-wheeler">
+                        <div class="stat-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="6" cy="19" r="3"/>
+                                <circle cx="18" cy="19" r="3"/>
+                                <path d="M9 19h6"/>
+                                <path d="M12 19V8"/>
+                                <path d="M8 8h8"/>
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <h4>Two Wheeler Slots</h4>
+                            <div class="slot-display">
+                                <span class="occupied" id="volunteerTwoWheelerOccupied">55</span>
+                                <span class="separator">/</span>
+                                <span class="total">100</span>
+                            </div>
+                            <div class="availability-bar">
+                                <div class="progress-bar">
+                                    <div class="progress-fill two-wheeler-progress" id="volunteerTwoWheelerProgress"></div>
+                                </div>
+                                <p class="availability-text">
+                                    <span id="volunteerTwoWheelerAvailable">45</span> slots available
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item four-wheeler">
+                        <div class="stat-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="7" cy="17" r="2"/>
+                                <circle cx="17" cy="17" r="2"/>
+                                <path d="M5 17h-2v-6l2-5h9l4 5v6h-2"/>
+                                <path d="M7 10h8"/>
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <h4>Four Wheeler Slots</h4>
+                            <div class="slot-display">
+                                <span class="occupied" id="volunteerFourWheelerOccupied">27</span>
+                                <span class="separator">/</span>
+                                <span class="total">50</span>
+                            </div>
+                            <div class="availability-bar">
+                                <div class="progress-bar">
+                                    <div class="progress-fill four-wheeler-progress" id="volunteerFourWheelerProgress"></div>
+                                </div>
+                                <p class="availability-text">
+                                    <span id="volunteerFourWheelerAvailable">23</span> slots available
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Bookings Management -->
+            <div class="content-card bookings-management">
+                <div class="card-header">
+                    <h3>Active Bookings</h3>
+                    <p>Monitor current parking reservations</p>
+                    <div class="header-actions">
+                        <button id="refreshBookings" class="btn secondary">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                                <path d="M21 3v5h-5"/>
+                                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                                <path d="M3 21v-5h5"/>
+                            </svg>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="bookings-filter">
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" data-filter="all">All Bookings</button>
+                        <button class="filter-tab" data-filter="two-wheeler">Two Wheeler</button>
+                        <button class="filter-tab" data-filter="four-wheeler">Four Wheeler</button>
+                        <button class="filter-tab" data-filter="expiring">Expiring Soon</button>
+                    </div>
+                </div>
+
+                <div class="bookings-list" id="activeBookingsList">
+                    <!-- Sample booking entries -->
+                    <div class="booking-item two-wheeler">
+                        <div class="booking-info">
+                            <div class="slot-badge two-wheeler">TW-42</div>
+                            <div class="booking-details">
+                                <h4>MH12AB1234</h4>
+                                <p class="booking-time">Booked: Today 2:30 PM</p>
+                                <p class="booking-duration">Duration: 3 hours</p>
+                            </div>
+                        </div>
+                        <div class="booking-status">
+                            <div class="status-indicator active"></div>
+                            <span class="status-text">Active</span>
+                            <div class="time-remaining">1h 45m left</div>
+                        </div>
+                        <div class="booking-actions">
+                            <button class="btn-action extend" title="Extend Booking">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12,6 12,12 16,14"/>
+                                </svg>
+                            </button>
+                            <button class="btn-action cancel" title="Cancel Booking">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"/>
+                                    <line x1="6" y1="6" x2="18" y2="18"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="booking-item four-wheeler">
+                        <div class="booking-info">
+                            <div class="slot-badge four-wheeler">FW-15</div>
+                            <div class="booking-details">
+                                <h4>KA05MN9876</h4>
+                                <p class="booking-time">Booked: Today 1:15 PM</p>
+                                <p class="booking-duration">Duration: 2 hours</p>
+                            </div>
+                        </div>
+                        <div class="booking-status">
+                            <div class="status-indicator expiring"></div>
+                            <span class="status-text">Expiring Soon</span>
+                            <div class="time-remaining">15m left</div>
+                        </div>
+                        <div class="booking-actions">
+                            <button class="btn-action extend" title="Extend Booking">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12,6 12,12 16,14"/>
+                                </svg>
+                            </button>
+                            <button class="btn-action cancel" title="Cancel Booking">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"/>
+                                    <line x1="6" y1="6" x2="18" y2="18"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="booking-item two-wheeler">
+                        <div class="booking-info">
+                            <div class="slot-badge two-wheeler">TW-73</div>
+                            <div class="booking-details">
+                                <h4>DL8CAB5432</h4>
+                                <p class="booking-time">Booked: Today 3:00 PM</p>
+                                <p class="booking-duration">Duration: 4 hours</p>
+                            </div>
+                        </div>
+                        <div class="booking-status">
+                            <div class="status-indicator active"></div>
+                            <span class="status-text">Active</span>
+                            <div class="time-remaining">3h 30m left</div>
+                        </div>
+                        <div class="booking-actions">
+                            <button class="btn-action extend" title="Extend Booking">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12,6 12,12 16,14"/>
+                                </svg>
+                            </button>
+                            <button class="btn-action cancel" title="Cancel Booking">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"/>
+                                    <line x1="6" y1="6" x2="18" y2="18"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parking Statistics -->
+            <div class="content-card parking-statistics">
+                <div class="card-header">
+                    <h3>Today's Statistics</h3>
+                    <p>Parking usage analytics for today</p>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon revenue">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="1" x2="12" y2="23"/>
+                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <h4>Total Revenue</h4>
+                            <p class="stat-value">₹2,340</p>
+                            <span class="stat-change positive">+12% from yesterday</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon bookings">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <h4>Total Bookings</h4>
+                            <p class="stat-value">47</p>
+                            <span class="stat-change positive">+8 new bookings</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon occupancy">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 11H5a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h4"/>
+                                <path d="M9 7h10a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9"/>
+                                <circle cx="9" cy="9" r="2"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <h4>Peak Occupancy</h4>
+                            <p class="stat-value">89%</p>
+                            <span class="stat-change neutral">at 2:30 PM</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon duration">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12,6 12,12 16,14"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <h4>Avg. Duration</h4>
+                            <p class="stat-value">2.5h</p>
+                            <span class="stat-change neutral">per booking</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Volunteer Booking Management -->
+            <div class="content-card volunteer-booking-form">
+                <div class="card-header">
+                    <h3>Create New Booking</h3>
+                    <p>Register a new parking reservation for visitors</p>
+                </div>
+                
+                <form id="volunteerBookingForm" class="form-stack">
+                    <div class="input-group">
+                        <label>Vehicle Type</label>
+                        <div class="vehicle-selection">
+                            <label class="vehicle-option">
+                                <input type="radio" name="volunteerVehicleType" value="twoWheeler" required>
+                                <div class="option-content">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="6" cy="19" r="3"/>
+                                        <circle cx="18" cy="19" r="3"/>
+                                        <path d="M9 19h6"/>
+                                        <path d="M12 19V8"/>
+                                        <path d="M8 8h8"/>
+                                    </svg>
+                                    <span>Two Wheeler</span>
+                                    <small>₹20/hour</small>
+                                </div>
+                            </label>
+                            <label class="vehicle-option">
+                                <input type="radio" name="volunteerVehicleType" value="fourWheeler" required>
+                                <div class="option-content">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="7" cy="17" r="2"/>
+                                        <circle cx="17" cy="17" r="2"/>
+                                        <path d="M5 17h-2v-6l2-5h9l4 5v6h-2"/>
+                                        <path d="M7 10h8"/>
+                                    </svg>
+                                    <span>Four Wheeler</span>
+                                    <small>₹50/hour</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="volunteerVehicleNumber">Vehicle Number</label>
+                        <input type="text" id="volunteerVehicleNumber" placeholder="e.g., MH 04 AB 1234" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="volunteerDuration">Parking Duration</label>
+                        <select id="volunteerDuration" required>
+                            <option value="">Select duration</option>
+                            <option value="1">1 Hour</option>
+                            <option value="2">2 Hours</option>
+                            <option value="3">3 Hours</option>
+                            <option value="4">4 Hours</option>
+                            <option value="6">6 Hours</option>
+                            <option value="8">8 Hours</option>
+                            <option value="fullday">Full Day (20% discount)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="assignedSlot">Assign Parking Slot</label>
+                        <select id="assignedSlot" required>
+                            <option value="">Auto-assign available slot</option>
+                            <optgroup label="Two Wheeler Slots">
+                                <option value="TW-01">TW-01 (Available)</option>
+                                <option value="TW-02">TW-02 (Available)</option>
+                                <option value="TW-03">TW-03 (Available)</option>
+                            </optgroup>
+                            <optgroup label="Four Wheeler Slots">
+                                <option value="FW-01">FW-01 (Available)</option>
+                                <option value="FW-02">FW-02 (Available)</option>
+                                <option value="FW-03">FW-03 (Available)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="pricing-info">
+                        <div class="price-breakdown">
+                            <div class="price-item">
+                                <span>Base Rate:</span>
+                                <span id="volunteerBaseRate">₹0</span>
+                            </div>
+                            <div class="price-item discount hidden">
+                                <span>Discount:</span>
+                                <span id="volunteerDiscount">₹0</span>
+                            </div>
+                            <div class="price-item total">
+                                <span>Total Amount:</span>
+                                <span id="volunteerTotalAmount">₹0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn primary full-width">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 12l2 2 4-4"/>
+                            <circle cx="12" cy="12" r="9"/>
+                        </svg>
+                        Create Booking
+                    </button>
+                </form>
+            </div>
+
+            <!-- Manual Check-in/Check-out -->
+            <div class="content-card checkin-management">
+                <div class="card-header">
+                    <h3>Manual Check-in/Check-out</h3>
+                    <p>Manage vehicle arrivals and departures</p>
+                </div>
+                
+                <div class="checkin-tabs">
+                    <button class="checkin-tab active" data-tab="checkin">Check-in</button>
+                    <button class="checkin-tab" data-tab="checkout">Check-out</button>
+                </div>
+
+                <div class="checkin-content">
+                    <div id="checkinTab" class="tab-content active">
+                        <form id="checkinForm" class="form-stack">
+                            <div class="input-group">
+                                <label for="checkinVehicleNumber">Vehicle Number</label>
+                                <input type="text" id="checkinVehicleNumber" placeholder="Enter vehicle number" required>
+                                <button type="button" id="searchBooking" class="btn secondary">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="11" cy="11" r="8"/>
+                                        <path d="m21 21-4.35-4.35"/>
+                                    </svg>
+                                    Search Booking
+                                </button>
+                            </div>
+                            
+                            <div id="bookingInfo" class="booking-info-card hidden">
+                                <div class="info-header">
+                                    <h4>Booking Found</h4>
+                                    <span class="booking-status-badge">Active</span>
+                                </div>
+                                <div class="info-details">
+                                    <p><strong>Slot:</strong> <span id="foundSlot">TW-42</span></p>
+                                    <p><strong>Duration:</strong> <span id="foundDuration">3 hours</span></p>
+                                    <p><strong>Amount:</strong> <span id="foundAmount">₹60</span></p>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn primary full-width">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 12l2 2 4-4"/>
+                                    <circle cx="12" cy="12" r="9"/>
+                                </svg>
+                                Confirm Check-in
+                            </button>
+                        </form>
+                    </div>
+
+                    <div id="checkoutTab" class="tab-content">
+                        <form id="checkoutForm" class="form-stack">
+                            <div class="input-group">
+                                <label for="checkoutVehicleNumber">Vehicle Number or Slot</label>
+                                <input type="text" id="checkoutVehicleNumber" placeholder="Enter vehicle number or slot" required>
+                                <button type="button" id="searchActiveBooking" class="btn secondary">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="11" cy="11" r="8"/>
+                                        <path d="m21 21-4.35-4.35"/>
+                                    </svg>
+                                    Find Active Booking
+                                </button>
+                            </div>
+                            
+                            <div id="activeBookingInfo" class="booking-info-card hidden">
+                                <div class="info-header">
+                                    <h4>Active Booking</h4>
+                                    <span class="booking-status-badge active">Checked-in</span>
+                                </div>
+                                <div class="info-details">
+                                    <p><strong>Vehicle:</strong> <span id="activeVehicle">MH12AB1234</span></p>
+                                    <p><strong>Slot:</strong> <span id="activeSlot">TW-42</span></p>
+                                    <p><strong>Check-in:</strong> <span id="checkinTime">2:30 PM</span></p>
+                                    <p><strong>Duration:</strong> <span id="activeDuration">3 hours</span></p>
+                                    <p><strong>Amount Paid:</strong> <span id="paidAmount">₹60</span></p>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn primary full-width">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 12l2 2 4-4"/>
+                                    <circle cx="12" cy="12" r="9"/>
+                                </svg>
+                                Process Check-out
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revenue & Payment Management -->
+            <div class="content-card revenue-management">
+                <div class="card-header">
+                    <h3>Revenue & Payment Management</h3>
+                    <p>Track payments and manage revenue collection</p>
+                </div>
+                
+                <div class="revenue-summary">
+                    <div class="revenue-stats">
+                        <div class="revenue-stat">
+                            <h4>Today's Collection</h4>
+                            <p class="amount">₹2,340</p>
+                            <span class="change positive">+₹280 from yesterday</span>
+                        </div>
+                        <div class="revenue-stat">
+                            <h4>Pending Payments</h4>
+                            <p class="amount">₹450</p>
+                            <span class="count">3 bookings</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="payment-actions">
+                    <button id="collectPayment" class="btn primary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="1" x2="12" y2="23"/>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                        </svg>
+                        Collect Payment
+                    </button>
+                    <button id="viewTransactions" class="btn secondary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14,2 14,8 20,8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                            <polyline points="10,9 9,9 8,9"/>
+                        </svg>
+                        View Transactions
+                    </button>
+                </div>
+
+                <div class="pending-payments">
+                    <h4>Pending Payments</h4>
+                    <div class="payment-list">
+                        <div class="payment-item">
+                            <div class="payment-info">
+                                <span class="vehicle-number">MH12CD5678</span>
+                                <span class="slot-info">Slot: FW-08</span>
+                            </div>
+                            <div class="payment-amount">₹150</div>
+                            <button class="btn-action collect">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 12l2 2 4-4"/>
+                                    <circle cx="12" cy="12" r="9"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="payment-item">
+                            <div class="payment-info">
+                                <span class="vehicle-number">KA05EF9012</span>
+                                <span class="slot-info">Slot: TW-25</span>
+                            </div>
+                            <div class="payment-amount">₹40</div>
+                            <button class="btn-action collect">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 12l2 2 4-4"/>
+                                    <circle cx="12" cy="12" r="9"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slot Management -->
+            <div class="content-card slot-management">
+                <div class="card-header">
+                    <h3>Parking Slot Management</h3>
+                    <p>Monitor and manage individual parking slots</p>
+                </div>
+                
+                <div class="slot-grid">
+                    <div class="slot-section">
+                        <h4>Two Wheeler Slots</h4>
+                        <div class="slots-container">
+                            <div class="slot-item occupied" data-slot="TW-01">
+                                <div class="slot-number">TW-01</div>
+                                <div class="slot-status">Occupied</div>
+                                <div class="slot-vehicle">MH12AB1234</div>
+                            </div>
+                            <div class="slot-item available" data-slot="TW-02">
+                                <div class="slot-number">TW-02</div>
+                                <div class="slot-status">Available</div>
+                            </div>
+                            <div class="slot-item occupied" data-slot="TW-03">
+                                <div class="slot-number">TW-03</div>
+                                <div class="slot-status">Occupied</div>
+                                <div class="slot-vehicle">DL8CAB5432</div>
+                            </div>
+                            <div class="slot-item maintenance" data-slot="TW-04">
+                                <div class="slot-number">TW-04</div>
+                                <div class="slot-status">Maintenance</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="slot-section">
+                        <h4>Four Wheeler Slots</h4>
+                        <div class="slots-container">
+                            <div class="slot-item occupied" data-slot="FW-01">
+                                <div class="slot-number">FW-01</div>
+                                <div class="slot-status">Occupied</div>
+                                <div class="slot-vehicle">KA05MN9876</div>
+                            </div>
+                            <div class="slot-item available" data-slot="FW-02">
+                                <div class="slot-number">FW-02</div>
+                                <div class="slot-status">Available</div>
+                            </div>
+                            <div class="slot-item reserved" data-slot="FW-03">
+                                <div class="slot-number">FW-03</div>
+                                <div class="slot-status">Reserved</div>
+                                <div class="slot-vehicle">Booking: 4:00 PM</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="slot-actions">
+                    <button id="markMaintenance" class="btn secondary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                        </svg>
+                        Mark for Maintenance
+                    </button>
+                    <button id="forceCheckout" class="btn warning">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16,17 21,12 16,7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                        Force Check-out
+                    </button>
                 </div>
             </div>
         </section>
