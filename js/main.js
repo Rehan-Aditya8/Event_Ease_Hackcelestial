@@ -616,10 +616,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (sosButton) {
     sosButton.addEventListener("click", () => {
+      // Show loading status
       locationStatus.classList.remove("hidden");
-      locationStatus.textContent = "Sending your location...";
+      locationStatus.textContent = "Getting your location...";
+      locationStatus.style.color = "var(--warning)";
+
+      // Show map section immediately
+      const mapSection = document.querySelector(".map-section");
+      if (mapSection) {
+        mapSection.style.display = "block";
+      }
 
       if (navigator.geolocation) {
+        // Get location with high accuracy
         navigator.geolocation.getCurrentPosition(
           (position) => {
             const pos = {
@@ -632,72 +641,149 @@ document.addEventListener("DOMContentLoaded", () => {
               userName: sessionStorage.getItem("userName") || "Anonymous User",
               timestamp: new Date().toISOString(),
               location: pos,
+              accuracy: position.coords.accuracy
             };
 
             activeEmergencies.push(emergency);
 
+            // Clear any existing map
             const userMap = document.getElementById("user-map");
             if (userMap) {
+              userMap.innerHTML = "";
+              
+              // Create map with user's live location
               const userMapInstance = L.map(userMap).setView(
                 [pos.lat, pos.lng],
-                15
+                16  // Higher zoom level for better detail
               );
 
+              // Add tile layer
               L.tileLayer(
                 "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                 {
-                  maxZoom: 18,
-                  minZoom: 8,
-                  tileSize: 512,
-                  zoomOffset: -1,
+                  maxZoom: 19,
+                  minZoom: 10,
                   attribution:
                     '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
                   crossOrigin: true,
-                  updateWhenIdle: true,
-                  updateWhenZooming: false,
                 }
               ).addTo(userMapInstance);
 
-              userMapInstance.options.fadeAnimation = false;
-              userMapInstance.options.zoomAnimation = false;
-              userMapInstance.options.markerZoomAnimation = false;
+              // Add emergency marker with custom icon
+              const emergencyIcon = L.divIcon({
+                className: 'emergency-marker',
+                html: '<div style="background: #ff0000; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(255,0,0,0.8);"></div>',
+                iconSize: [26, 26],
+                iconAnchor: [13, 13]
+              });
 
-              L.marker([pos.lat, pos.lng])
+              const marker = L.marker([pos.lat, pos.lng], { icon: emergencyIcon })
                 .addTo(userMapInstance)
-                .bindPopup("Your Location")
+                .bindPopup(`
+                  <div style="text-align: center;">
+                    <strong>🚨 EMERGENCY LOCATION</strong><br>
+                    <small>Lat: ${pos.lat.toFixed(6)}</small><br>
+                    <small>Lng: ${pos.lng.toFixed(6)}</small><br>
+                    <small>Accuracy: ±${Math.round(position.coords.accuracy)}m</small>
+                  </div>
+                `)
                 .openPopup();
+
+              // Add accuracy circle
+              L.circle([pos.lat, pos.lng], {
+                color: '#ff0000',
+                fillColor: '#ff0000',
+                fillOpacity: 0.1,
+                radius: position.coords.accuracy
+              }).addTo(userMapInstance);
+
+              // Update location details if elements exist
+              const coordsDisplay = document.getElementById("coordinates-display");
+              const accuracyDisplay = document.getElementById("accuracy-display");
+              const timestampDisplay = document.getElementById("timestamp-display");
+              const locationReport = document.getElementById("location-report");
+
+              if (coordsDisplay) {
+                coordsDisplay.textContent = `${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`;
+              }
+              if (accuracyDisplay) {
+                accuracyDisplay.textContent = `±${Math.round(position.coords.accuracy)} meters`;
+              }
+              if (timestampDisplay) {
+                timestampDisplay.textContent = new Date().toLocaleString();
+              }
+              if (locationReport) {
+                locationReport.classList.remove("hidden");
+              }
+
+              // Reverse geocoding to get address
+              fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.lat}&lon=${pos.lng}`)
+                .then(response => response.json())
+                .then(data => {
+                  const addressDisplay = document.getElementById("address-display");
+                  if (addressDisplay && data.display_name) {
+                    addressDisplay.textContent = data.display_name;
+                  }
+                })
+                .catch(error => {
+                  console.log("Address lookup failed:", error);
+                  const addressDisplay = document.getElementById("address-display");
+                  if (addressDisplay) {
+                    addressDisplay.textContent = "Address lookup unavailable";
+                  }
+                });
             }
 
-            locationStatus.textContent =
-              "Help request sent! Medical staff has been notified.";
+            // Update status
+            locationStatus.textContent = "✅ Emergency alert sent! Your location has been shared with medical staff.";
             locationStatus.style.color = "var(--success)";
 
             showToast(
-              "Emergency alert sent successfully! Your location in Navi Mumbai has been shared."
+              "🚨 Emergency alert sent successfully! Medical staff can see your exact location."
             );
 
+            // Keep status visible longer for emergency situations
             setTimeout(() => {
-              locationStatus.classList.add("hidden");
               locationStatus.style.color = "";
-            }, 5000);
+            }, 10000);
           },
           (error) => {
             console.error("Geolocation error:", error);
-            locationStatus.textContent =
-              "Could not get your location. Please try again.";
+            let errorMessage = "Could not get your location. ";
+            
+            switch(error.code) {
+              case error.PERMISSION_DENIED:
+                errorMessage += "Please allow location access and try again.";
+                break;
+              case error.POSITION_UNAVAILABLE:
+                errorMessage += "Location information is unavailable.";
+                break;
+              case error.TIMEOUT:
+                errorMessage += "Location request timed out. Please try again.";
+                break;
+              default:
+                errorMessage += "An unknown error occurred.";
+                break;
+            }
+
+            locationStatus.textContent = errorMessage;
             locationStatus.style.color = "var(--danger)";
 
-            showToast("Error: Could not determine your location.");
+            showToast("❌ Error: " + errorMessage);
 
             setTimeout(() => {
               locationStatus.classList.add("hidden");
               locationStatus.style.color = "";
-            }, 5000);
+            }, 8000);
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
           }
         );
       } else {
-        locationStatus.textContent =
-          "Your browser doesn't support geolocation.";
+        locationStatus.textContent = "❌ Your browser doesn't support geolocation.";
         locationStatus.style.color = "var(--danger)";
 
         showToast("Error: Your browser doesn't support geolocation.");

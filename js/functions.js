@@ -133,8 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
           width: 140,
           height: 140,
           colorDark: "#000000",
-          colorLight: "#ffffff",
-          correctLevel: QRCode.CorrectLevel.H
+          colorLight: "#ffffff"
         });
       }
     }
@@ -458,16 +457,21 @@ document.addEventListener("DOMContentLoaded", () => {
         initLostFoundChat();
       } else if (viewId === "emergency") {
         const role = sessionStorage.getItem("role");
+        console.log('Current user role:', role);
         const userMedical = document.getElementById("user-medical");
         const volunteerMedical = document.getElementById("volunteer-medical");
         
         if (role === "volunteer") {
           if (userMedical) userMedical.classList.add("hidden");
           if (volunteerMedical) volunteerMedical.classList.remove("hidden");
+          console.log('Volunteer view activated, initializing map...');
           initEmergencyMap();
         } else {
           if (userMedical) userMedical.classList.remove("hidden");
           if (volunteerMedical) volunteerMedical.classList.add("hidden");
+          console.log('User view activated, initializing map...');
+          // Initialize map for regular users too
+          initEmergencyMap();
         }
       } else if (viewId === 'dashboard') {
         initDashboard();
@@ -588,8 +592,337 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   
   function initEmergencyMap() {
-    // Emergency map initialization logic would go here
-    console.log('Emergency map initialized');
+    console.log('initEmergencyMap called');
+    
+    // Determine which map container to use based on visible section
+    const userMedical = document.getElementById('user-medical');
+    const volunteerMedical = document.getElementById('volunteer-medical');
+    let containerId = 'emergency-map'; // default for volunteer view
+    
+    // Check which section is visible
+    if (userMedical && !userMedical.classList.contains('hidden')) {
+      containerId = 'user-map';
+      console.log('Using user-map container');
+      // Initialize enhanced map with live tracking for user view
+      initEnhancedUserMap();
+      return;
+    } else if (volunteerMedical && !volunteerMedical.classList.contains('hidden')) {
+      containerId = 'emergency-map';
+      console.log('Using emergency-map container');
+    }
+    
+    // Check if the map container exists
+    const mapContainer = document.getElementById(containerId);
+    console.log('Map container found:', mapContainer);
+    
+    if (!mapContainer) {
+      console.error('Map container not found:', containerId);
+      return;
+    }
+    
+    // Check container visibility and dimensions
+    const containerStyle = window.getComputedStyle(mapContainer);
+    console.log('Container display:', containerStyle.display);
+    console.log('Container visibility:', containerStyle.visibility);
+    console.log('Container dimensions:', mapContainer.offsetWidth, 'x', mapContainer.offsetHeight);
+    
+    // Initialize the emergency map using the maps.js function
+    if (typeof initMap === 'function') {
+      console.log('initMap function found, calling it with container:', containerId);
+      // Add a small delay to ensure the DOM element is visible
+      setTimeout(() => {
+        try {
+          const mapInstance = initMap(containerId);
+          if (mapInstance) {
+            console.log('Emergency map initialized successfully');
+          } else {
+            console.error('Map initialization returned null');
+          }
+        } catch (error) {
+          console.error('Error initializing map:', error);
+        }
+      }, 300);
+    } else {
+      console.error('initMap function not found. Make sure maps.js is loaded.');
+      console.log('Available window functions:', Object.keys(window).filter(key => key.includes('map') || key.includes('Map')));
+    }
+  }
+
+  // Enhanced User Map with Live Location Tracking
+  let userMap = null;
+  let currentLocationMarker = null;
+  let locationTrail = [];
+  let trailPolyline = null;
+  let watchId = null;
+  let isTracking = false;
+  let lastUpdateTime = 0;
+  const UPDATE_INTERVAL = 5000; // 5 seconds
+
+  function initEnhancedUserMap() {
+    console.log('Initializing enhanced user map with live tracking');
+    
+    const mapContainer = document.getElementById('user-map');
+    if (!mapContainer) {
+      console.error('User map container not found');
+      return;
+    }
+
+    // Clear existing map
+    if (userMap) {
+      userMap.remove();
+      userMap = null;
+    }
+
+    // Initialize map centered on Navi Mumbai
+    userMap = L.map('user-map').setView([19.0330, 73.0297], 13);
+    
+    // Add tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19
+    }).addTo(userMap);
+
+    // Add medical facilities markers (sample data)
+    const medicalFacilities = [
+      { name: "Apollo Hospital", lat: 19.0330, lng: 73.0297, type: "hospital" },
+      { name: "Fortis Hospital", lat: 19.0400, lng: 73.0350, type: "hospital" },
+      { name: "City Clinic", lat: 19.0280, lng: 73.0250, type: "clinic" },
+      { name: "Emergency Care Center", lat: 19.0380, lng: 73.0320, type: "emergency" }
+    ];
+
+    medicalFacilities.forEach(facility => {
+      const icon = L.divIcon({
+        className: 'medical-facility-marker',
+        html: `<div style="background: #f44336; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">🏥 ${facility.name}</div>`,
+        iconSize: [120, 30],
+        iconAnchor: [60, 15]
+      });
+      
+      L.marker([facility.lat, facility.lng], { icon }).addTo(userMap)
+        .bindPopup(`<strong>${facility.name}</strong><br>Medical Facility`);
+    });
+
+    // Setup tracking controls
+    setupTrackingControls();
+    
+    // Get initial location
+    getCurrentLocation();
+  }
+
+  function setupTrackingControls() {
+    const trackBtn = document.getElementById('track-location-btn');
+    const clearBtn = document.getElementById('clear-trail-btn');
+    
+    if (trackBtn) {
+      trackBtn.addEventListener('click', toggleTracking);
+    }
+    
+    if (clearBtn) {
+      clearBtn.addEventListener('click', clearTrail);
+    }
+  }
+
+  function getCurrentLocation() {
+    if (!navigator.geolocation) {
+      updateStatus('error', 'Geolocation not supported');
+      return;
+    }
+
+    updateStatus('', 'Getting current location...');
+    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const accuracy = position.coords.accuracy;
+        
+        updateLocationOnMap(lat, lng, accuracy);
+        userMap.setView([lat, lng], 16);
+        updateStatus('', `Location found (±${Math.round(accuracy)}m)`);
+      },
+      (error) => {
+        let errorMessage = 'Location error';
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = 'Location access denied';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = 'Location unavailable';
+            break;
+          case error.TIMEOUT:
+            errorMessage = 'Location request timeout';
+            break;
+        }
+        updateStatus('error', errorMessage);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
+  }
+
+  function updateLocationOnMap(lat, lng, accuracy) {
+    // Remove previous marker
+    if (currentLocationMarker) {
+      userMap.removeLayer(currentLocationMarker);
+    }
+
+    // Create current location marker with pulse animation
+    const currentLocationIcon = L.divIcon({
+      className: 'current-location-marker',
+      html: `
+        <div style="position: relative;">
+          <div style="width: 20px; height: 20px; background: #4285f4; border: 3px solid white; border-radius: 50%; box-shadow: 0 2px 8px rgba(66, 133, 244, 0.4);"></div>
+          <div style="position: absolute; top: -15px; left: -15px; width: 50px; height: 50px; border: 2px solid #4285f4; border-radius: 50%; opacity: 0.3; animation: pulse 2s infinite;"></div>
+        </div>
+      `,
+      iconSize: [20, 20],
+      iconAnchor: [10, 10]
+    });
+
+    currentLocationMarker = L.marker([lat, lng], { icon: currentLocationIcon }).addTo(userMap);
+    
+    const currentTime = new Date().toLocaleTimeString();
+    const popupContent = `
+      <div style="text-align: center;">
+        <strong>📍 Your Current Location</strong><br>
+        <small>Lat: ${lat.toFixed(6)}<br>
+        Lng: ${lng.toFixed(6)}<br>
+        Accuracy: ±${Math.round(accuracy)}m<br>
+        Updated: ${currentTime}</small>
+      </div>
+    `;
+    
+    currentLocationMarker.bindPopup(popupContent);
+
+    // Add to trail if tracking
+    if (isTracking) {
+      locationTrail.push([lat, lng]);
+      updateTrail();
+    }
+  }
+
+  function updateTrail() {
+    if (trailPolyline) {
+      userMap.removeLayer(trailPolyline);
+    }
+    
+    if (locationTrail.length > 1) {
+      trailPolyline = L.polyline(locationTrail, {
+        color: '#4285f4',
+        weight: 3,
+        opacity: 0.6,
+        smoothFactor: 1
+      }).addTo(userMap);
+    }
+  }
+
+  function toggleTracking() {
+    if (isTracking) {
+      stopTracking();
+    } else {
+      startTracking();
+    }
+  }
+
+  function startTracking() {
+    if (!navigator.geolocation) {
+      updateStatus('error', 'Geolocation not supported');
+      return;
+    }
+
+    isTracking = true;
+    const trackBtn = document.getElementById('track-location-btn');
+    if (trackBtn) {
+      trackBtn.textContent = '⏹ Stop Live Tracking';
+      trackBtn.classList.add('active');
+    }
+    
+    updateStatus('tracking', 'Starting live tracking...');
+
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 30000
+    };
+
+    watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const now = Date.now();
+        
+        // Throttle updates
+        if (now - lastUpdateTime < UPDATE_INTERVAL) {
+          return;
+        }
+        lastUpdateTime = now;
+
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const accuracy = position.coords.accuracy;
+
+        updateLocationOnMap(lat, lng, accuracy);
+        updateStatus('tracking', `Live tracking active (±${Math.round(accuracy)}m)`);
+      },
+      (error) => {
+        let errorMessage = 'Tracking error';
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = 'Location access denied';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = 'Location unavailable';
+            break;
+          case error.TIMEOUT:
+            errorMessage = 'Location request timeout';
+            break;
+        }
+        updateStatus('error', errorMessage);
+      },
+      options
+    );
+  }
+
+  function stopTracking() {
+    if (watchId !== null) {
+      navigator.geolocation.clearWatch(watchId);
+      watchId = null;
+    }
+    
+    isTracking = false;
+    const trackBtn = document.getElementById('track-location-btn');
+    if (trackBtn) {
+      trackBtn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/>
+        </svg>
+        Start Live Tracking
+      `;
+      trackBtn.classList.remove('active');
+    }
+    
+    updateStatus('', 'Location tracking stopped');
+  }
+
+  function clearTrail() {
+    locationTrail = [];
+    if (trailPolyline) {
+      userMap.removeLayer(trailPolyline);
+      trailPolyline = null;
+    }
+    updateStatus('', isTracking ? 'Live tracking - Trail cleared' : 'Trail cleared');
+  }
+
+  function updateStatus(type, message) {
+    const statusDot = document.getElementById('status-dot');
+    const statusText = document.getElementById('status-text');
+    
+    if (statusDot) {
+      statusDot.className = 'status-dot';
+      if (type) statusDot.classList.add(type);
+    }
+    
+    if (statusText) {
+      statusText.textContent = message;
+    }
   }
   
   if (sosButton) {

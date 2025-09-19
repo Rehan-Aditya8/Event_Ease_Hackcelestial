@@ -640,18 +640,112 @@ body {
     text-align: center;
 }
 
+.qr-codes-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.custom-qr, .generated-qr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 200px;
+}
+
+.custom-qr-image {
+    width: 100px;
+    height: 100px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.5rem;
+    background: var(--bg-primary);
+}
+
 .qr-container #qrcode {
     background: var(--bg-primary);
-    padding: 1rem;
-    border-radius: var(--radius-lg);
+    padding: 0.5rem;
+    border-radius: var(--radius-md);
     display: inline-block;
-    margin-bottom: 1rem;
     border: 1px solid var(--border-color);
+}
+
+.qr-container #qrcode img,
+.qr-container #qrcode canvas {
+    width: 100px !important;
+    height: 100px !important;
+}
+
+.qr-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    text-align: center;
 }
 
 .qr-instruction {
     font-size: 0.875rem;
     opacity: 0.9;
+    margin-top: 1rem;
+}
+
+/* Responsive design for larger screens */
+@media (min-width: 768px) {
+    .qr-codes-wrapper {
+        flex-direction: row;
+        gap: 2rem;
+    }
+    
+    .custom-qr, .generated-qr {
+        max-width: 150px;
+    }
+    
+    .custom-qr-image {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .qr-container #qrcode img,
+    .qr-container #qrcode canvas {
+        width: 120px !important;
+        height: 120px !important;
+    }
+}
+
+/* Responsive design for very small screens */
+@media (max-width: 480px) {
+    .qr-codes-wrapper {
+        gap: 1rem;
+    }
+    
+    .custom-qr, .generated-qr {
+        max-width: 160px;
+    }
+    
+    .custom-qr-image {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .qr-container #qrcode img,
+    .qr-container #qrcode canvas {
+        width: 80px !important;
+        height: 80px !important;
+    }
+    
+    .qr-label {
+        font-size: 0.8rem;
+    }
+    
+    .qr-instruction {
+        font-size: 0.8rem;
+    }
 }
 
 /* Scanner Styles */
@@ -2633,396 +2727,204 @@ select:focus-visible {
     background: var(--bg-secondary);
 }
 
-/* Volunteer Parking Features Styles */
-.volunteer-booking-form {
-    margin-top: 2rem;
-}
-
-.volunteer-booking-form .card-header h3 {
-    color: var(--primary-color);
-    font-size: 1.25rem;
-    font-weight: 600;
-}
-
-.volunteer-booking-form .form-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.volunteer-booking-form .input-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.volunteer-booking-form .vehicle-selection {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
-
-.volunteer-booking-form .vehicle-option {
-    position: relative;
-    cursor: pointer;
-}
-
-.volunteer-booking-form .vehicle-option input[type="radio"] {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
-}
-
-.volunteer-booking-form .option-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 1rem;
-    border: 2px solid var(--border-color);
-    border-radius: var(--radius-md);
+/* Interactive Map Section Styles */
+.interactive-map-section {
+    margin-top: 30px;
+    padding: 20px;
     background: var(--bg-primary);
-    transition: var(--transition);
-}
-
-.volunteer-booking-form .vehicle-option:hover .option-content {
-    border-color: var(--primary-color);
-    background: var(--bg-secondary);
-}
-
-.volunteer-booking-form .vehicle-option input[type="radio"]:checked + .option-content {
-    border-color: var(--primary-color);
-    background: rgba(74, 144, 226, 0.1);
-}
-
-/* Check-in Management Styles */
-.checkin-management {
-    margin-top: 2rem;
-}
-
-.checkin-tabs {
-    display: flex;
-    border-bottom: 2px solid var(--border-color);
-    margin-bottom: 1.5rem;
-}
-
-.checkin-tab {
-    flex: 1;
-    padding: 0.75rem 1rem;
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    font-weight: 500;
-    cursor: pointer;
-    transition: var(--transition);
-    border-bottom: 2px solid transparent;
-}
-
-.checkin-tab.active {
-    color: var(--primary-color);
-    border-bottom-color: var(--primary-color);
-}
-
-.checkin-tab:hover {
-    color: var(--primary-color);
-    background: var(--bg-secondary);
-}
-
-.tab-content {
-    display: none;
-}
-
-.tab-content.active {
-    display: block;
-}
-
-.booking-info-card {
-    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: 1rem;
-    margin: 1rem 0;
-}
-
-.booking-info-card .info-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.75rem;
-}
-
-.booking-status-badge {
-    padding: 0.25rem 0.75rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.booking-status-badge.active {
-    background: rgba(76, 175, 80, 0.2);
-    color: var(--success-color);
-}
-
-.info-details p {
-    margin: 0.25rem 0;
-    color: var(--text-secondary);
-}
-
-/* Revenue Management Styles */
-.revenue-management {
-    margin-top: 2rem;
-}
-
-.revenue-summary {
-    margin-bottom: 1.5rem;
-}
-
-.revenue-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
-
-.revenue-stat {
-    background: var(--bg-secondary);
-    padding: 1rem;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
-}
-
-.revenue-stat h4 {
-    color: var(--text-secondary);
-    font-size: 0.875rem;
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-}
-
-.revenue-stat .amount {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin-bottom: 0.25rem;
-}
-
-.revenue-stat .change {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-}
-
-.revenue-stat .change.positive {
-    color: var(--success-color);
-}
-
-.revenue-stat .count {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-}
-
-.payment-actions {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.payment-actions .btn {
-    flex: 1;
-}
-
-.pending-payments h4 {
-    margin-bottom: 1rem;
-    color: var(--text-primary);
-    font-size: 1rem;
-    font-weight: 600;
-}
-
-.payment-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.payment-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.75rem;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-}
-
-.payment-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.payment-info .vehicle-number {
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.payment-info .slot-info {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-}
-
-.payment-amount {
-    font-weight: 700;
-    color: var(--primary-color);
-    font-size: 1.125rem;
-}
-
-/* Slot Management Styles */
-.slot-management {
-    margin-top: 2rem;
-}
-
-.slot-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    margin-bottom: 1.5rem;
-}
-
-.slot-section h4 {
-    margin-bottom: 1rem;
-    color: var(--text-primary);
-    font-size: 1rem;
-    font-weight: 600;
-}
-
-.slots-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 0.75rem;
-}
-
-.slot-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0.75rem;
-    border-radius: var(--radius-md);
-    border: 2px solid var(--border-color);
-    background: var(--bg-primary);
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.slot-item:hover {
-    transform: translateY(-2px);
     box-shadow: var(--shadow-md);
 }
 
-.slot-item.occupied {
-    border-color: var(--error-color);
-    background: rgba(244, 67, 54, 0.1);
-}
-
-.slot-item.available {
-    border-color: var(--success-color);
-    background: rgba(76, 175, 80, 0.1);
-}
-
-.slot-item.reserved {
-    border-color: var(--warning-color);
-    background: rgba(255, 152, 0, 0.1);
-}
-
-.slot-item.maintenance {
-    border-color: var(--text-muted);
-    background: rgba(153, 153, 153, 0.1);
-}
-
-.slot-number {
-    font-weight: 700;
-    font-size: 0.875rem;
+.interactive-map-section h4 {
+    margin-bottom: 15px;
     color: var(--text-primary);
-    margin-bottom: 0.25rem;
+    font-size: 16px;
+    font-weight: 600;
 }
 
-.slot-status {
-    font-size: 0.75rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    margin-bottom: 0.25rem;
+.embedded-map {
+    width: 100%;
+    height: 500px;
+    border-radius: var(--radius-md);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
 }
 
-.slot-item.occupied .slot-status {
-    color: var(--error-color);
+/* Enhanced Map Styles */
+.enhanced-map {
+    height: 500px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
 }
 
-.slot-item.available .slot-status {
-    color: var(--success-color);
-}
-
-.slot-item.reserved .slot-status {
-    color: var(--warning-color);
-}
-
-.slot-item.maintenance .slot-status {
-    color: var(--text-muted);
-}
-
-.slot-vehicle {
-    font-size: 0.625rem;
-    color: var(--text-secondary);
-    text-align: center;
-}
-
-.slot-actions {
+.map-controls {
     display: flex;
-    gap: 1rem;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
 }
 
-.slot-actions .btn {
-    flex: 1;
+.map-controls .btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: var(--radius-md);
+    transition: all 0.2s ease;
 }
 
-/* Responsive Design for New Features */
-@media (max-width: 768px) {
-    .volunteer-booking-form .vehicle-selection {
-        grid-template-columns: 1fr;
+.map-controls .btn.primary {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+}
+
+.map-controls .btn.primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+}
+
+.map-controls .btn.ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+.map-controls .btn.ghost:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.map-controls .btn.active {
+    background: #f44336;
+    color: white;
+}
+
+.status-indicator {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+    background: white;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ccc;
+    transition: all 0.3s ease;
+}
+
+.status-dot.tracking {
+    background: #4caf50;
+    animation: pulse-dot 2s infinite;
+}
+
+.status-dot.error {
+    background: #f44336;
+}
+
+@keyframes pulse-dot {
+    0% {
+        transform: scale(1);
+        opacity: 1;
     }
-    
-    .revenue-stats {
-        grid-template-columns: 1fr;
+    50% {
+        transform: scale(1.3);
+        opacity: 0.7;
     }
-    
-    .payment-actions {
-        flex-direction: column;
-    }
-    
-    .slots-container {
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    }
-    
-    .slot-actions {
-        flex-direction: column;
+    100% {
+        transform: scale(1);
+        opacity: 1;
     }
 }
 
-/* Dark Theme Support for New Features */
-[data-theme="dark"] .volunteer-booking-form,
-[data-theme="dark"] .checkin-management,
-[data-theme="dark"] .revenue-management,
-[data-theme="dark"] .slot-management {
+/* Current location marker animation */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.3;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.3;
+    }
+}
+
+/* Dark theme styles for interactive map */
+[data-theme="dark"] .interactive-map-section {
+    background: var(--bg-primary);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .embedded-map {
     background: var(--bg-secondary);
     border-color: var(--border-color);
 }
 
-[data-theme="dark"] .booking-info-card,
-[data-theme="dark"] .revenue-stat,
-[data-theme="dark"] .payment-item,
-[data-theme="dark"] .slot-item {
-    background: var(--bg-tertiary);
+[data-theme="dark"] .status-indicator {
+    background: var(--bg-secondary);
     border-color: var(--border-color);
+    color: var(--text-primary);
 }
 
-[data-theme="dark"] .checkin-tab:hover {
+[data-theme="dark"] .map-controls .btn.ghost {
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .map-controls .btn.ghost:hover {
     background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+/* Responsive adjustments for enhanced map */
+@media (max-width: 768px) {
+    .enhanced-map {
+        height: 400px;
+    }
+    
+    .map-controls {
+        flex-direction: column;
+    }
+    
+    .map-controls .btn {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .enhanced-map {
+        height: 350px;
+    }
+    
+    .interactive-map-section {
+        padding: 15px;
+        margin-top: 20px;
+    }
+    
+    .status-indicator {
+        font-size: 11px;
+        padding: 6px 10px;
+    }
 }
 
 
