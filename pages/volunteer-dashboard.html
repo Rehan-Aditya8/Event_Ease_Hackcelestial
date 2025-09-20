@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Volunteer Dashboard – EventEase</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/volunteer-dashboard.css">
+  <link rel="stylesheet" href="../css/toast.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""/>
+  <!-- Firebase SDK -->
+  <script type="module" src="../js/firebase.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 48 48" aria-hidden="true">
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#4A90E2"/>
+            <stop offset="100%" stop-color="#9B51E0"/>
+          </linearGradient>
+        </defs>
+        <path fill="url(#g)" d="M28 4c6 2 9 7 10 13l-7 7-5-5 2-7-7 2-5-5c6-3 9-4 12-5z"/>
+        <circle cx="30" cy="14" r="3" fill="#fff" opacity=".9"/>
+        <path d="M13 35c3-6 8-10 14-12l5 5c-2 6-6 11-12 14 1-3-2-6-7-7z" fill="#FF6B6B"/>
+      </svg>
+      <span>EventEase - Volunteer</span>
+      <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <nav class="top-actions">
+      <a href="../index.html" class="btn ghost" title="Home">Home</a>
+      <button id="logoutBtn" class="btn ghost" title="Logout">Logout</button>
+    </nav>
+  </header>
+
+  <!-- Sidebar Overlay for Mobile -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <aside class="sidebar">
+    <nav class="sidebar-nav">
+      <button data-view="dashboard" class="nav-btn active">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9,22 9,12 15,12 15,22"/>
+        </svg>
+        <span>🏠 Dashboard</span>
+      </button>
+      <button data-view="ticket" class="nav-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2 2 2 0 0 1 2 2v3a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-3a2 2 0 0 1 2-2 2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2z"/>
+        </svg>
+        <span>🎫 EasyEntry</span>
+      </button>
+      <button data-view="announcements" class="nav-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
+        <span>📢 Announcements</span>
+      </button>
+      <button data-view="lostfound" class="nav-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+        </svg>
+        <span>🔎 Lost & Found</span>
+      </button>
+      <button data-view="emergency" class="nav-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        <span>🚨 Medical</span>
+      </button>
+      <button data-view="volunteer-parking" class="nav-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 3h8a5 5 0 0 1 0 10H4z"/>
+          <line x1="4" y1="3" x2="4" y2="21"/>
+        </svg>
+        <span>🚗 Parking</span>
+      </button>
+      <button data-view="volunteer-management" class="nav-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        <span>👥 Management</span>
+      </button>
+      <button class="nav-btn resource-center-btn" onclick="window.location.href='user-resource-center.html'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="M9 12l2 2 4-4"/>
+        </svg>
+        <span>🛡️ Resource Center</span>
+      </button>
+    </nav>
+  </aside>
+
+  <main id="app">
+    <section id="dashboard" class="view">
+      <!-- Volunteer Dashboard -->
+      <div id="volunteer-dashboard" class="modern-dashboard">
+        <!-- Welcome Header -->
+        <div class="welcome-header">
+          <div class="welcome-content">
+            <h1 class="welcome-title">Welcome back, <span id="volunteerUserName" class="volunteer-name">Volunteer</span>! 👋</h1>
+            <p class="welcome-subtitle">Ready to make this event amazing? Your volunteer dashboard is here to help.</p>
+            <div class="welcome-badge">
+              <span class="badge-icon">🎯</span>
+              <span class="badge-text">Event Staff</span>
+            </div>
+          </div>
+          <div class="welcome-avatar">
+            <div class="avatar-circle">
+              <span class="avatar-initial" id="avatarInitial">V</span>
+            </div>
+            <div class="status-indicator online"></div>
+          </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="stats-grid">
+          <div class="stat-card primary">
+            <div class="stat-icon">🎫</div>
+            <div class="stat-content">
+              <div class="stat-number" id="ticketsScanned">0</div>
+              <div class="stat-label">Tickets Scanned</div>
+            </div>
+            <div class="stat-trend up">+12%</div>
+          </div>
+          <div class="stat-card success">
+            <div class="stat-icon">✅</div>
+            <div class="stat-content">
+              <div class="stat-number" id="tasksCompleted">0</div>
+              <div class="stat-label">Tasks Completed</div>
+            </div>
+            <div class="stat-trend up">+8%</div>
+          </div>
+          <div class="stat-card warning">
+            <div class="stat-icon">⏰</div>
+            <div class="stat-content">
+              <div class="stat-number" id="hoursWorked">0</div>
+              <div class="stat-label">Hours Today</div>
+            </div>
+            <div class="stat-trend neutral">--</div>
+          </div>
+          <div class="stat-card info">
+            <div class="stat-icon">📢</div>
+            <div class="stat-content">
+              <div class="stat-number" id="newAnnouncements">3</div>
+              <div class="stat-label">New Updates</div>
+            </div>
+            <div class="stat-trend up">+2</div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions-section">
+          <h3 class="section-title">Quick Actions</h3>
+          <div class="quick-actions-grid">
+            <button class="quick-action-btn primary" data-view="ticket">
+              <div class="action-icon-wrapper">
+                <div class="action-icon">🎫</div>
+              </div>
+              <div class="action-content">
+                <div class="action-title">Scan Tickets</div>
+                <div class="action-desc">Verify attendee entry</div>
+              </div>
+              <div class="action-arrow">→</div>
+            </button>
+            
+            <button class="quick-action-btn emergency" data-view="emergency">
+              <div class="action-icon-wrapper">
+                <div class="action-icon">🚨</div>
+              </div>
+              <div class="action-content">
+                <div class="action-title">Emergency</div>
+                <div class="action-desc">Report incidents</div>
+              </div>
+              <div class="action-arrow">→</div>
+            </button>
+            
+            <button class="quick-action-btn info" data-view="announcements">
+              <div class="action-icon-wrapper">
+                <div class="action-icon">📢</div>
+              </div>
+              <div class="action-content">
+                <div class="action-title">Announcements</div>
+                <div class="action-desc">Latest updates</div>
+              </div>
+              <div class="action-arrow">→</div>
+            </button>
+            
+            <button class="quick-action-btn success" data-view="lostfound">
+              <div class="action-icon-wrapper">
+                <div class="action-icon">🔎</div>
+              </div>
+              <div class="action-content">
+                <div class="action-title">Lost & Found</div>
+                <div class="action-desc">Help attendees</div>
+              </div>
+              <div class="action-arrow">→</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Volunteer Tools -->
+        <div class="volunteer-tools-section">
+          <h3 class="section-title">Volunteer Tools</h3>
+          <div class="tools-grid">
+            <div class="tool-card featured" data-view="volunteer-parking">
+              <div class="tool-header">
+                <div class="tool-icon">🚗</div>
+                <div class="tool-badge">Staff Only</div>
+              </div>
+              <div class="tool-content">
+                <h4 class="tool-title">Parking Management</h4>
+                <p class="tool-description">Monitor parking areas, guide attendees, and manage vehicle flow efficiently.</p>
+                <div class="tool-stats">
+                  <span class="tool-stat">
+                    <span class="stat-icon">🚙</span>
+                    <span>245 vehicles</span>
+                  </span>
+                  <span class="tool-stat">
+                    <span class="stat-icon">📍</span>
+                    <span>12 spots left</span>
+                  </span>
+                </div>
+              </div>
+              <button class="tool-action-btn">Manage Parking</button>
+            </div>
+            
+            <div class="tool-card" data-view="volunteer-management">
+              <div class="tool-header">
+                <div class="tool-icon">👥</div>
+                <div class="tool-badge">Coordination</div>
+              </div>
+              <div class="tool-content">
+                <h4 class="tool-title">Team Management</h4>
+                <p class="tool-description">Coordinate with other volunteers, check schedules, and manage assignments.</p>
+                <div class="tool-stats">
+                  <span class="tool-stat">
+                    <span class="stat-icon">👤</span>
+                    <span>24 volunteers</span>
+                  </span>
+                  <span class="tool-stat">
+                    <span class="stat-icon">📋</span>
+                    <span>8 tasks pending</span>
+                  </span>
+                </div>
+              </div>
+              <button class="tool-action-btn">View Team</button>
+            </div>
+
+            <div class="tool-card ai-powered" onclick="window.location.href='resource-allocation.html'">
+              <div class="tool-header">
+                <div class="tool-icon">📊</div>
+                <div class="tool-badge ai-badge">AI Powered</div>
+              </div>
+              <div class="tool-content">
+                <h4 class="tool-title">Resource Allocation</h4>
+                <p class="tool-description">AI-powered resource deployment suggestions based on real-time crowd data and analytics.</p>
+                <div class="tool-stats">
+                  <span class="tool-stat">
+                    <span class="stat-icon">👮</span>
+                    <span>12 security deployed</span>
+                  </span>
+                  <span class="tool-stat">
+                    <span class="stat-icon">🚧</span>
+                    <span>8 barriers active</span>
+                  </span>
+                </div>
+              </div>
+              <button class="tool-action-btn ai-btn">Open Dashboard</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="activity-section">
+          <h3 class="section-title">Recent Activity</h3>
+          <div class="activity-feed">
+            <div class="activity-item">
+              <div class="activity-icon success">✅</div>
+              <div class="activity-content">
+                <div class="activity-text">Scanned ticket for John Doe</div>
+                <div class="activity-time">2 minutes ago</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon info">📢</div>
+              <div class="activity-content">
+                <div class="activity-text">New announcement: Event schedule updated</div>
+                <div class="activity-time">15 minutes ago</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon warning">🔎</div>
+              <div class="activity-content">
+                <div class="activity-text">Helped locate lost phone in Section A</div>
+                <div class="activity-time">1 hour ago</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ticket Scanning Section -->
+    <section id="ticket" class="view hidden">
+      <div class="crumbs">
+        <button type="button" class="btn ghost back" data-view="dashboard">← Back</button>
+      </div>
+      <h2 class="view-title">🎫 Ticket Scanner</h2>
+      <p class="view-subtitle">Scan or manually enter ticket codes to verify attendee entry</p>
+
+      <!-- QR Scanner & Manual Entry -->
+      <div class="scanner-container">
+        <div class="scanner-card">
+          <div class="scanner-tabs">
+            <button class="scanner-tab-btn active" data-tab="qr-scanner">
+              <span class="tab-icon">📷</span>
+              <span class="tab-text">QR Scanner</span>
+            </button>
+            <button class="scanner-tab-btn" data-tab="manual-entry">
+              <span class="tab-icon">⌨️</span>
+              <span class="tab-text">Manual Entry</span>
+            </button>
+            <a href="resource-allocation.html" class="scanner-tab-btn">
+              <span class="tab-icon">📊</span>
+              <span class="tab-text">Resource Allocation</span>
+            </a>
+          </div>
+
+          <!-- QR Scanner Tab -->
+          <div id="qr-scanner" class="scanner-tab-content active">
+            <div class="scanner-area">
+              <div id="scanner-preview" class="scanner-preview">
+                <div class="scanner-overlay">
+                  <div class="scanner-frame"></div>
+                  <p class="scanner-instruction">Position QR code within the frame</p>
+                </div>
+                <video id="scanner-video" autoplay muted playsinline></video>
+              </div>
+              <div class="scanner-controls">
+                <button id="start-camera" class="btn primary scanner-btn">
+                  <span class="btn-icon">📷</span>
+                  Start Camera
+                </button>
+                <button id="stop-camera" class="btn secondary scanner-btn hidden">
+                  <span class="btn-icon">⏹️</span>
+                  Stop Camera
+                </button>
+              </div>
+              
+              <!-- Debug Log Area -->
+              <div id="scanner-debug-log" class="debug-log" style="display: none;">
+                <h4>Debug Log</h4>
+                <div id="debug-content" class="debug-content"></div>
+                <button id="toggle-debug" class="btn ghost">Show Debug</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Manual Entry Tab -->
+          <div id="manual-entry" class="scanner-tab-content">
+            <div class="manual-entry-area">
+              <form id="manual-ticket-form" class="manual-form">
+                <div class="input-group">
+                  <label for="ticket-code-input" class="input-label">
+                    <span class="label-text">Ticket Code</span>
+                    <span class="label-desc">Enter the 6-digit ticket code</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    id="ticket-code-input" 
+                    class="ticket-input" 
+                    placeholder="000000" 
+                    maxlength="6" 
+                    pattern="[0-9]{6}"
+                    required 
+                  />
+                </div>
+                <button type="submit" class="btn primary verify-btn">
+                  <span class="btn-icon">✅</span>
+                  Verify Ticket
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Scan Result Display -->
+          <div id="scan-result" class="scan-result hidden">
+            <div class="result-header">
+              <div class="result-status" id="result-status">
+                <span class="status-icon" id="status-icon">✅</span>
+                <span class="status-text" id="status-text">Valid Ticket</span>
+              </div>
+              <button class="result-close" id="close-result">×</button>
+            </div>
+            <div class="result-content">
+              <div class="ticket-info">
+                <div class="info-item">
+                  <span class="info-label">Ticket Code:</span>
+                  <span class="info-value" id="scanned-code">------</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Scan Time:</span>
+                  <span class="info-value" id="scan-time">--:--:--</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Status:</span>
+                  <span class="info-value" id="ticket-status">Verified</span>
+                </div>
+              </div>
+              <div class="result-actions">
+                <button class="btn success" id="admit-attendee">
+                  <span class="btn-icon">🚪</span>
+                  Admit Attendee
+                </button>
+                <button class="btn secondary" id="scan-another">
+                  <span class="btn-icon">🔄</span>
+                  Scan Another
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scanning Statistics -->
+        <div class="scan-stats">
+          <div class="stat-item">
+            <div class="stat-number" id="total-scanned">0</div>
+            <div class="stat-label">Total Scanned</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" id="valid-tickets">0</div>
+            <div class="stat-label">Valid Tickets</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" id="invalid-tickets">0</div>
+            <div class="stat-label">Invalid Tickets</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Announcements Section -->
+    <section id="announcements" class="view hidden">
+      <div class="crumbs">
+        <button type="button" class="btn ghost back" data-view="dashboard">← Back</button>
+      </div>
+      <h2 class="view-title">📢 Announcements</h2>
+      <p class="view-subtitle">Create and manage announcements for event attendees</p>
+
+      <!-- Announcement Creation Form -->
+      <div id="volunteer-announcement" class="announcement-form">
+        <h4>Make Announcement</h4>
+        <form id="announcement-form">
+          <div class="form-group">
+            <label for="announcement-title">Title</label>
+            <input type="text" id="announcement-title" name="title" placeholder="Announcement title" required>
+          </div>
+          <div class="form-group">
+            <label for="announcement-content">Content</label>
+            <textarea id="announcement-content" name="content" placeholder="Announcement content" rows="4" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="announcement-priority">Priority</label>
+            <select id="announcement-priority" name="priority">
+              <option value="general">General</option>
+              <option value="important">Important</option>
+              <option value="emergency">Emergency</option>
+            </select>
+          </div>
+          <button type="submit" class="btn primary">Post Announcement</button>
+        </form>
+      </div>
+      
+      <!-- Announcements List -->
+      <div id="announcements-list" class="announcements-container">
+        <div class="announcement-filters">
+          <button class="btn ghost active" data-filter="all">All</button>
+          <button class="btn ghost" data-filter="general">General</button>
+          <button class="btn ghost" data-filter="important">Important</button>
+          <button class="btn ghost" data-filter="emergency">Emergency</button>
+        </div>
+        <ul id="announcement-items" class="list">
+          <li class="empty-state">No announcements yet</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Lost & Found Section -->
+    <section id="lostfound" class="view hidden">
+      <div class="crumbs">
+        <button type="button" class="btn ghost back" data-view="dashboard">← Back</button>
+      </div>
+      <h2 class="view-title">🔎 Lost & Found</h2>
+      
+      <div class="chat-container">
+        <div id="chatBox" class="chat-box">
+          <!-- Chat messages will appear here -->
+        </div>
+        
+        <form id="chatForm" class="chat-form">
+          <input type="text" id="chatName" placeholder="Your name" required />
+          <input type="text" id="chatMessage" placeholder="Describe the lost item or report found item..." required />
+          <input type="file" id="chatImage" accept="image/*" />
+          <button type="submit" class="btn primary">Send</button>
+        </form>
+      </div>
+
+      <!-- Volunteer Lost & Found Management -->
+      <div class="volunteer-lostfound card">
+        <h3>Volunteer Management</h3>
+        <div id="volunteerChatBox" class="chat-box">
+          <!-- Volunteer chat messages will appear here -->
+        </div>
+        
+        <form id="volunteerChatForm" class="chat-form">
+          <input type="text" id="volunteerChatName" placeholder="Volunteer name" required />
+          <input type="text" id="volunteerChatMessage" placeholder="Update on lost/found items..." required />
+          <input type="file" id="volunteerChatImage" accept="image/*" />
+          <button type="submit" class="btn primary">Send Update</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Medical Emergency Section -->
+    <section id="emergency" class="view hidden">
+      <div class="crumbs">
+        <button type="button" class="btn ghost back" data-view="dashboard">← Back</button>
+      </div>
+      <h2 class="view-title">🚨 Medical Emergency</h2>
+      
+      <div class="emergency-container">
+        <div class="emergency-card urgent">
+          <h3>🚨 Emergency Alert</h3>
+          <p>Press the SOS button in case of medical emergency</p>
+          <button id="sos-button" class="btn emergency large">
+            🆘 SOS - Medical Emergency
+          </button>
+          <div id="location-status" class="location-status hidden">
+            📍 Getting your location...
+          </div>
+        </div>
+        
+        <div class="emergency-info">
+          <h4>Emergency Contacts</h4>
+          <div class="contact-list">
+            <div class="contact-item">
+              <span class="contact-label">Event Medical Team:</span>
+              <span class="contact-number">+1 (555) 123-4567</span>
+            </div>
+            <div class="contact-item">
+              <span class="contact-label">Local Emergency:</span>
+              <span class="contact-number">911</span>
+            </div>
+            <div class="contact-item">
+              <span class="contact-label">Event Security:</span>
+              <span class="contact-number">+1 (555) 987-6543</span>
+            </div>
+          </div>
+        </div>
+        
+        <div id="user-map" class="map-container"></div>
+      </div>
+    </section>
+
+    <!-- Volunteer Parking Management -->
+    <section id="volunteer-parking" class="view hidden">
+      <div class="crumbs">
+        <button type="button" class="btn ghost back" data-view="dashboard">← Back</button>
+      </div>
+      <h2 class="view-title">🚗 Parking Management</h2>
+      
+      <div class="parking-overview">
+        <div class="parking-stats">
+          <div class="stat-card">
+            <div class="stat-icon">🚗</div>
+            <div class="stat-content">
+              <div class="stat-number" id="totalCars">0</div>
+              <div class="stat-label">Total Cars</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🏍️</div>
+            <div class="stat-content">
+              <div class="stat-number" id="totalBikes">0</div>
+              <div class="stat-label">Two Wheelers</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📍</div>
+            <div class="stat-content">
+              <div class="stat-number" id="availableSlots">50</div>
+              <div class="stat-label">Available Slots</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="parking-actions">
+          <button class="btn primary" id="addVehicle">Add Vehicle</button>
+          <button class="btn secondary" id="removeVehicle">Remove Vehicle</button>
+          <button class="btn ghost" id="viewParkingMap">View Parking Map</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Volunteer Management -->
+    <section id="volunteer-management" class="view hidden">
+      <div class="crumbs">
+        <button type="button" class="btn ghost back" data-view="dashboard">← Back</button>
+      </div>
+      <h2 class="view-title">👥 Volunteer Management</h2>
+      
+      <div class="volunteer-tools">
+        <div class="tool-card">
+          <h3>Staff Directory</h3>
+          <p>View and contact other volunteers and staff members</p>
+          <button class="btn primary">View Directory</button>
+        </div>
+        
+        <div class="tool-card">
+          <h3>Task Assignment</h3>
+          <p>Check your assigned tasks and update status</p>
+          <button class="btn primary">View Tasks</button>
+        </div>
+        
+        <div class="tool-card">
+          <h3>Shift Schedule</h3>
+          <p>View your shift schedule and swap requests</p>
+          <button class="btn primary">View Schedule</button>
+        </div>
+        
+        <div class="tool-card">
+          <h3>Event Reports</h3>
+          <p>Submit incident reports and feedback</p>
+          <button class="btn primary">Create Report</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast hidden">
+    <span id="toast-message"></span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="../assets/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+  <script src="../js/volunteer-dashboard.js"></script>
+</body>
+</html>

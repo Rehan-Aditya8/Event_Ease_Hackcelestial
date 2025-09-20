@@ -52,6 +52,7 @@
           <button class="card link" data-view="announcements"><div class="icon">📢</div><div class="label">Announcements</div></button>
           <button class="card link" data-view="lostfound"><div class="icon">🔎</div><div class="label">Lost & Found</div></button>
           <button class="card link" data-view="emergency"><div class="icon">🚨</div><div class="label">Medical</div></button>
+          <button class="card link resource-center" onclick="window.location.href='user-resource-center.html'"><div class="icon">🛡️</div><div class="label">Resource Center</div></button>
         </div>
       </div>
 
@@ -111,6 +112,14 @@
             <div class="action-content">
               <div class="action-label">Medical Emergency</div>
               <div class="action-description">Get immediate medical assistance.</div>
+            </div>
+            <div class="action-arrow">→</div>
+          </button>
+          <button class="action-card" data-view="volunteer-parking">
+            <div class="action-icon">🚗</div>
+            <div class="action-content">
+              <div class="action-label">Parking Management</div>
+              <div class="action-description">Manage event parking and vehicle tracking.</div>
             </div>
             <div class="action-arrow">→</div>
           </button>
@@ -257,16 +266,138 @@
   <div class="crumbs">
     <button type="button" class="btn ghost back" data-view="dashboard">← Back</button>
   </div>
-  <h2 class="view-title">Lost & Found Chat</h2>
+  <h2 class="view-title">Lost & Found</h2>
 
-  <div id="chatBox" class="chat-box"></div>
+  <!-- Volunteer Lost & Found Management -->
+  <div id="volunteer-lostfound" class="volunteer-lostfound hidden">
+    <div class="lostfound-tabs">
+      <button class="tab-btn active" data-tab="chat">Chat View</button>
+      <button class="tab-btn" data-tab="manage">Manage Items</button>
+      <button class="tab-btn" data-tab="reports">Reports</button>
+    </div>
 
-  <form id="chatForm" class="chat-form">
-    <input type="text" id="chatName" placeholder="Your name" required />
-    <input type="text" id="chatMessage" placeholder="Type a message..." required />
-    <input type="file" id="chatImage" accept="image/*" />
-    <button type="submit" class="btn primary">Send</button>
-  </form>
+    <!-- Chat Tab -->
+    <div id="chat-tab" class="tab-content active">
+      <div class="volunteer-chat-header">
+        <h3>Lost & Found Chat - Volunteer View</h3>
+        <div class="chat-stats">
+          <span class="stat">Active Chats: <span id="activeChatCount">0</span></span>
+          <span class="stat">Resolved Today: <span id="resolvedCount">0</span></span>
+        </div>
+      </div>
+      <div id="volunteerChatBox" class="chat-box volunteer-chat"></div>
+      <form id="volunteerChatForm" class="chat-form volunteer-form">
+        <input type="text" id="volunteerChatName" placeholder="Your name (Volunteer)" required />
+        <input type="text" id="volunteerChatMessage" placeholder="Type a response..." required />
+        <input type="file" id="volunteerChatImage" accept="image/*" />
+        <button type="submit" class="btn primary">Send Response</button>
+      </form>
+    </div>
+
+    <!-- Manage Items Tab -->
+    <div id="manage-tab" class="tab-content">
+      <div class="manage-header">
+        <h3>Lost & Found Item Management</h3>
+        <button id="addItemBtn" class="btn primary">+ Add Found Item</button>
+      </div>
+      
+      <div class="items-filters">
+        <button class="filter-btn active" data-filter="all">All Items</button>
+        <button class="filter-btn" data-filter="lost">Lost</button>
+        <button class="filter-btn" data-filter="found">Found</button>
+        <button class="filter-btn" data-filter="returned">Returned</button>
+      </div>
+
+      <div id="itemsList" class="items-list">
+        <!-- Items will be populated here -->
+      </div>
+
+      <!-- Add Item Modal -->
+      <div id="addItemModal" class="modal hidden">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Add Found Item</h3>
+            <button id="closeModal" class="close-btn">&times;</button>
+          </div>
+          <form id="addItemForm" class="modal-form">
+            <div class="form-group">
+              <label for="itemName">Item Name</label>
+              <input type="text" id="itemName" placeholder="e.g., Blue Backpack" required>
+            </div>
+            <div class="form-group">
+              <label for="itemDescription">Description</label>
+              <textarea id="itemDescription" placeholder="Detailed description..." rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+              <label for="itemLocation">Found Location</label>
+              <input type="text" id="itemLocation" placeholder="e.g., Main Hall, Room 301" required>
+            </div>
+            <div class="form-group">
+              <label for="itemCategory">Category</label>
+              <select id="itemCategory" required>
+                <option value="">Select category</option>
+                <option value="electronics">Electronics</option>
+                <option value="clothing">Clothing</option>
+                <option value="accessories">Accessories</option>
+                <option value="documents">Documents</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="itemImage">Item Photo (Optional)</label>
+              <input type="file" id="itemImage" accept="image/*">
+            </div>
+            <div class="modal-actions">
+              <button type="button" id="cancelAdd" class="btn ghost">Cancel</button>
+              <button type="submit" class="btn primary">Add Item</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reports Tab -->
+    <div id="reports-tab" class="tab-content">
+      <div class="reports-header">
+        <h3>Lost & Found Reports</h3>
+        <div class="date-filter">
+          <label for="reportDate">Filter by Date:</label>
+          <input type="date" id="reportDate" />
+          <button id="generateReport" class="btn secondary">Generate Report</button>
+        </div>
+      </div>
+      
+      <div class="reports-summary">
+        <div class="summary-card">
+          <div class="summary-number" id="totalItems">0</div>
+          <div class="summary-label">Total Items</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-number" id="returnedItems">0</div>
+          <div class="summary-label">Returned</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-number" id="pendingItems">0</div>
+          <div class="summary-label">Pending</div>
+        </div>
+      </div>
+
+      <div id="reportsList" class="reports-list">
+        <!-- Reports will be populated here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- User Lost & Found Chat (Original) -->
+  <div id="user-lostfound" class="user-lostfound">
+    <div id="chatBox" class="chat-box"></div>
+    <form id="chatForm" class="chat-form">
+      <input type="text" id="chatName" placeholder="Your name" required />
+      <input type="text" id="chatMessage" placeholder="Type a message..." required />
+      <input type="file" id="chatImage" accept="image/*" />
+      <button type="submit" class="btn primary">Send</button>
+    </form>
+  </div>
 </section>
 
 
@@ -287,17 +418,61 @@
       </div>
       
       <div id="volunteer-medical" class="medical-container hidden">
-        <h3>Medical Emergency Map - Navi Mumbai</h3>
-        <div id="emergency-map" class="map-container">
+        <h3>Medical Emergency Dashboard - Navi Mumbai</h3>
+        
+        <!-- Emergency Statistics -->
+        <div class="emergency-stats">
+          <div class="stat-card">
+            <div class="stat-number" id="activeEmergencies">0</div>
+            <div class="stat-label">Active Emergencies</div>
           </div>
-        <div id="emergency-list" class="emergency-list">
-          <h4>Active Emergency Requests</h4>
-          <ul id="emergency-requests" class="list">
-            </ul>
+          <div class="stat-card">
+            <div class="stat-number" id="resolvedToday">0</div>
+            <div class="stat-label">Resolved Today</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="avgResponseTime">0</div>
+            <div class="stat-label">Avg Response (min)</div>
+          </div>
         </div>
-        <div class="map-controls">
-          <button id="refresh-map" class="btn primary">Refresh Map</button>
-          <button id="center-map" class="btn ghost">Center on Navi Mumbai</button>
+
+        <!-- Emergency Map -->
+        <div id="emergency-map" class="map-container large-map">
+        </div>
+        
+        <!-- Emergency Controls -->
+        <div class="emergency-controls">
+          <div id="emergency-list" class="emergency-list">
+            <h4>🚨 Active Emergency Requests</h4>
+            <ul id="emergency-requests" class="requests-list">
+            </ul>
+          </div>
+          
+          <div class="emergency-actions">
+            <button id="refresh-emergencies" class="btn primary">🔄 Refresh</button>
+            <button id="center-map" class="btn secondary">📍 Center Map</button>
+            <button id="emergency-history" class="btn ghost">📋 History</button>
+          </div>
+        </div>
+
+        <!-- Emergency Details Modal -->
+        <div id="emergencyModal" class="modal hidden">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>Emergency Details</h3>
+              <button id="closeEmergencyModal" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+              <div id="emergencyDetails">
+                <!-- Emergency details will be populated here -->
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button id="respondToEmergency" class="btn primary">Respond</button>
+              <button id="markResolved" class="btn success">Mark Resolved</button>
+              <button id="cancelEmergency" class="btn ghost">Cancel</button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -314,6 +489,6 @@
   
   <script src="../assets/qrcode.min.js"></script>
   <script src="../js/maps.js"></script>
-  <script src="../js/main.js"></script>
+  <script type="module" src="../js/dashboard.js"></script>
 </body>
 </html>

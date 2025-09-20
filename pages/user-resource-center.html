@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resource Allocation Center - EventEase</title>
+    <link rel="stylesheet" href="../css/user-resource-center.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="header-brand">
+                <svg width="32" height="32" viewBox="0 0 48 48" class="brand-icon">
+                    <defs>
+                        <linearGradient id="brandGradient" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#4A90E2" />
+                            <stop offset="100%" stop-color="#9B51E0" />
+                        </linearGradient>
+                    </defs>
+                    <path fill="url(#brandGradient)" d="M28 4c6 2 9 7 10 13l-7 7-5-5 2-7-7 2-5-5c6-3 9-4 12-5z" />
+                    <circle cx="30" cy="14" r="3" fill="#fff" opacity=".9" />
+                    <path d="M13 35c3-6 8-10 14-12l5 5c-2 6-6 11-12 14 1-3-2-6-7-7z" fill="#FF6B6B" />
+                </svg>
+                <span class="brand-text">EventEase</span>
+                <span class="page-title">Resource Center</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn ghost" id="refresh-btn">
+                    <span class="btn-icon">🔄</span>
+                    Refresh
+                </button>
+                <button class="btn secondary" onclick="window.location.href='dashboard.html'">
+                    <span class="btn-icon">🏠</span>
+                    Dashboard
+                </button>
+                <button class="btn primary" onclick="logout()">
+                    <span class="btn-icon">👋</span>
+                    Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Status Banner -->
+        <div class="status-banner">
+            <div class="banner-content">
+                <div class="banner-icon">🛡️</div>
+                <div class="banner-text">
+                    <h2>Event Safety & Resource Status</h2>
+                    <p>Real-time information about security, medical, and crowd management resources at your event</p>
+                </div>
+                <div class="banner-status">
+                    <div class="status-indicator" id="overall-status">
+                        <div class="status-dot safe"></div>
+                        <span class="status-text">All Systems Operational</span>
+                    </div>
+                    <div class="last-update">
+                        Last updated: <span id="last-update-time">--:--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Overview Cards -->
+        <div class="overview-section">
+            <h3 class="section-title">Current Status Overview</h3>
+            <div class="overview-grid">
+                <div class="overview-card security">
+                    <div class="card-header">
+                        <div class="card-icon">👮</div>
+                        <div class="card-title">Security Personnel</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="main-stat">
+                            <span class="stat-number" id="security-count">12</span>
+                            <span class="stat-label">Active</span>
+                        </div>
+                        <div class="sub-stats">
+                            <div class="sub-stat">
+                                <span class="sub-number" id="security-main">4</span>
+                                <span class="sub-label">Main Stage</span>
+                            </div>
+                            <div class="sub-stat">
+                                <span class="sub-number" id="security-entrance">3</span>
+                                <span class="sub-label">Entrance</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-status">
+                        <div class="status-bar">
+                            <div class="status-fill" style="width: 85%"></div>
+                        </div>
+                        <span class="status-percentage">85% Coverage</span>
+                    </div>
+                </div>
+
+                <div class="overview-card medical">
+                    <div class="card-header">
+                        <div class="card-icon">🏥</div>
+                        <div class="card-title">Medical Support</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="main-stat">
+                            <span class="stat-number" id="medical-count">6</span>
+                            <span class="stat-label">Available</span>
+                        </div>
+                        <div class="sub-stats">
+                            <div class="sub-stat">
+                                <span class="sub-number" id="medical-stations">2</span>
+                                <span class="sub-label">Aid Stations</span>
+                            </div>
+                            <div class="sub-stat">
+                                <span class="sub-number" id="medical-mobile">3</span>
+                                <span class="sub-label">Mobile Units</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-status">
+                        <div class="status-bar">
+                            <div class="status-fill medical-fill" style="width: 92%"></div>
+                        </div>
+                        <span class="status-percentage">92% Ready</span>
+                    </div>
+                </div>
+
+                <div class="overview-card crowd">
+                    <div class="card-header">
+                        <div class="card-icon">🚧</div>
+                        <div class="card-title">Crowd Control</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="main-stat">
+                            <span class="stat-number" id="barriers-count">8</span>
+                            <span class="stat-label">Barriers</span>
+                        </div>
+                        <div class="sub-stats">
+                            <div class="sub-stat">
+                                <span class="sub-number" id="barriers-stage">3</span>
+                                <span class="sub-label">Stage Area</span>
+                            </div>
+                            <div class="sub-stat">
+                                <span class="sub-number" id="barriers-queue">2</span>
+                                <span class="sub-label">Queue Mgmt</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-status">
+                        <div class="status-bar">
+                            <div class="status-fill crowd-fill" style="width: 78%"></div>
+                        </div>
+                        <span class="status-percentage">78% Deployed</span>
+                    </div>
+                </div>
+
+                <div class="overview-card attendance">
+                    <div class="card-header">
+                        <div class="card-icon">👥</div>
+                        <div class="card-title">Event Capacity</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="main-stat">
+                            <span class="stat-number" id="attendance-count">2,847</span>
+                            <span class="stat-label">Attendees</span>
+                        </div>
+                        <div class="sub-stats">
+                            <div class="sub-stat">
+                                <span class="sub-number" id="capacity-percentage">77%</span>
+                                <span class="sub-label">Capacity</span>
+                            </div>
+                            <div class="sub-stat">
+                                <span class="sub-number" id="peak-time">8:30 PM</span>
+                                <span class="sub-label">Peak Time</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-status">
+                        <div class="status-bar">
+                            <div class="status-fill attendance-fill" style="width: 77%"></div>
+                        </div>
+                        <span class="status-percentage">Safe Levels</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Information Section -->
+        <div class="details-section">
+            <div class="details-grid">
+                <!-- Zone Status Map -->
+                <div class="detail-panel map-panel">
+                    <div class="panel-header">
+                        <h4 class="panel-title">
+                            <span class="panel-icon">🗺️</span>
+                            Zone Status Map
+                        </h4>
+                        <div class="panel-controls">
+                            <select id="zone-filter" class="filter-select">
+                                <option value="all">All Zones</option>
+                                <option value="high">High Density</option>
+                                <option value="medium">Medium Density</option>
+                                <option value="low">Low Density</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <div class="zone-map">
+                            <div class="zone-item" data-zone="main-stage">
+                                <div class="zone-indicator high"></div>
+                                <div class="zone-info">
+                                    <div class="zone-name">Main Stage Area</div>
+                                    <div class="zone-stats">
+                                        <span class="zone-count">1,247 people</span>
+                                        <span class="zone-capacity">83% capacity</span>
+                                    </div>
+                                </div>
+                                <div class="zone-resources">
+                                    <span class="resource-tag security">4 Security</span>
+                                    <span class="resource-tag medical">1 Medic</span>
+                                </div>
+                            </div>
+
+                            <div class="zone-item" data-zone="food-court">
+                                <div class="zone-indicator medium"></div>
+                                <div class="zone-info">
+                                    <div class="zone-name">Food Court</div>
+                                    <div class="zone-stats">
+                                        <span class="zone-count">623 people</span>
+                                        <span class="zone-capacity">78% capacity</span>
+                                    </div>
+                                </div>
+                                <div class="zone-resources">
+                                    <span class="resource-tag security">2 Security</span>
+                                    <span class="resource-tag crowd">2 Barriers</span>
+                                </div>
+                            </div>
+
+                            <div class="zone-item" data-zone="entrance">
+                                <div class="zone-indicator low"></div>
+                                <div class="zone-info">
+                                    <div class="zone-name">Main Entrance</div>
+                                    <div class="zone-stats">
+                                        <span class="zone-count">312 people</span>
+                                        <span class="zone-capacity">62% capacity</span>
+                                    </div>
+                                </div>
+                                <div class="zone-resources">
+                                    <span class="resource-tag security">3 Security</span>
+                                    <span class="resource-tag medical">1 Aid Station</span>
+                                </div>
+                            </div>
+
+                            <div class="zone-item" data-zone="merchandise">
+                                <div class="zone-indicator medium"></div>
+                                <div class="zone-info">
+                                    <div class="zone-name">Merchandise Area</div>
+                                    <div class="zone-stats">
+                                        <span class="zone-count">665 people</span>
+                                        <span class="zone-capacity">74% capacity</span>
+                                    </div>
+                                </div>
+                                <div class="zone-resources">
+                                    <span class="resource-tag security">3 Security</span>
+                                    <span class="resource-tag crowd">3 Barriers</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Updates Feed -->
+                <div class="detail-panel updates-panel">
+                    <div class="panel-header">
+                        <h4 class="panel-title">
+                            <span class="panel-icon">📡</span>
+                            Live Updates
+                        </h4>
+                        <div class="panel-controls">
+                            <button class="btn small ghost" id="clear-updates">Clear</button>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <div class="updates-feed" id="updates-feed">
+                            <div class="update-item success">
+                                <div class="update-time">8:45 PM</div>
+                                <div class="update-content">
+                                    <div class="update-title">Security Deployed</div>
+                                    <div class="update-description">Additional security personnel deployed to Main Stage area due to increased crowd density</div>
+                                </div>
+                                <div class="update-badge">Security</div>
+                            </div>
+
+                            <div class="update-item info">
+                                <div class="update-time">8:42 PM</div>
+                                <div class="update-content">
+                                    <div class="update-title">Crowd Flow Optimized</div>
+                                    <div class="update-description">Barriers repositioned at Food Court to improve crowd movement</div>
+                                </div>
+                                <div class="update-badge">Crowd Control</div>
+                            </div>
+
+                            <div class="update-item medical">
+                                <div class="update-time">8:38 PM</div>
+                                <div class="update-content">
+                                    <div class="update-title">Medical Unit Standby</div>
+                                    <div class="update-description">Mobile medical unit positioned near Main Stage as precautionary measure</div>
+                                </div>
+                                <div class="update-badge">Medical</div>
+                            </div>
+
+                            <div class="update-item success">
+                                <div class="update-time">8:35 PM</div>
+                                <div class="update-content">
+                                    <div class="update-title">All Systems Check</div>
+                                    <div class="update-description">Routine safety check completed - all resources operational</div>
+                                </div>
+                                <div class="update-badge">System</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Information -->
+        <div class="emergency-section">
+            <div class="emergency-panel">
+                <div class="emergency-header">
+                    <div class="emergency-icon">🚨</div>
+                    <div class="emergency-content">
+                        <h4>Emergency Information</h4>
+                        <p>Important safety information and emergency contacts</p>
+                    </div>
+                </div>
+                <div class="emergency-grid">
+                    <div class="emergency-item">
+                        <div class="emergency-item-icon">🏥</div>
+                        <div class="emergency-item-content">
+                            <div class="emergency-item-title">Medical Emergency</div>
+                            <div class="emergency-item-info">Find nearest volunteer or call emergency services</div>
+                        </div>
+                        <div class="emergency-item-action">
+                            <button class="btn emergency-btn">Get Help</button>
+                        </div>
+                    </div>
+
+                    <div class="emergency-item">
+                        <div class="emergency-item-icon">🔒</div>
+                        <div class="emergency-item-content">
+                            <div class="emergency-item-title">Security Concern</div>
+                            <div class="emergency-item-info">Report suspicious activity to security personnel</div>
+                        </div>
+                        <div class="emergency-item-action">
+                            <button class="btn emergency-btn">Report</button>
+                        </div>
+                    </div>
+
+                    <div class="emergency-item">
+                        <div class="emergency-item-icon">🚪</div>
+                        <div class="emergency-item-content">
+                            <div class="emergency-item-title">Emergency Exits</div>
+                            <div class="emergency-item-info">Locate nearest emergency exit routes</div>
+                        </div>
+                        <div class="emergency-item-action">
+                            <button class="btn emergency-btn">View Map</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-text">
+                <span>EventEase Resource Center</span>
+                <span class="separator">•</span>
+                <span>Real-time event safety monitoring</span>
+            </div>
+            <div class="footer-status">
+                <div class="connection-status" id="connection-status">
+                    <div class="connection-dot connected"></div>
+                    <span>Connected</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/user-resource-center.js"></script>
+</body>
+</html>

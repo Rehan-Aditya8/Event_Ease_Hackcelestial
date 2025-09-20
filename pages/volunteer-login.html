@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volunteer Login - EventEase</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script type="module" src="../js/firebase.js"></script>
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --primary-dark: #2f6fbd;
+            --secondary: #9b51e0;
+            --accent: #ff6b6b;
+            --volunteer-primary: #28a745;
+            --volunteer-secondary: #20c997;
+            --volunteer-accent: #17a2b8;
+            --bg-dark: #0a0a0f;
+            --bg-darker: #050508;
+            --surface: #1a1a24;
+            --surface-light: #2a2a3a;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0c0;
+            --text-muted: #808090;
+            --border: #2a2a3a;
+            --shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            --shadow-light: 0 8px 32px rgba(0, 0, 0, 0.2);
+            --radius: 16px;
+            --radius-large: 24px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Volunteer-themed animated background */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--volunteer-primary) 0%, var(--volunteer-secondary) 50%, var(--volunteer-accent) 100%);
+            opacity: 0.1;
+            animation: volunteerGradientShift 8s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes volunteerGradientShift {
+            0%, 100% { transform: translateX(-50%) translateY(-50%) rotate(0deg); }
+            50% { transform: translateX(-30%) translateY(-30%) rotate(180deg); }
+        }
+
+        .volunteer-login-container {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-large);
+            padding: 48px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: var(--shadow);
+            position: relative;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .back-home-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--surface-light);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 8px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .back-home-btn:hover {
+            background: var(--volunteer-primary);
+            color: var(--text-primary);
+            transform: translateY(-2px);
+        }
+
+        .volunteer-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .volunteer-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--volunteer-primary), var(--volunteer-secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 36px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .volunteer-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--volunteer-primary), var(--volunteer-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .volunteer-subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .volunteer-form {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px 20px;
+            background: var(--surface-light);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-size: 16px;
+            font-family: var(--font-family);
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: var(--volunteer-primary);
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .volunteer-code-group {
+            background: var(--surface-light);
+            border: 1px solid var(--volunteer-primary);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin: 16px 0;
+        }
+
+        .volunteer-code-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--volunteer-primary);
+            margin-bottom: 12px;
+        }
+
+        .volunteer-code-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 16px;
+            font-family: monospace;
+            letter-spacing: 2px;
+            text-align: center;
+            text-transform: uppercase;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .volunteer-code-input:focus {
+            border-color: var(--volunteer-primary);
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
+
+        .volunteer-login-btn {
+            background: linear-gradient(135deg, var(--volunteer-primary), var(--volunteer-secondary));
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 16px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: var(--font-family);
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .volunteer-login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-light);
+        }
+
+        .volunteer-login-btn:active {
+            transform: translateY(0);
+        }
+
+        .volunteer-login-btn.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .volunteer-login-btn.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .volunteer-features {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        .features-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .feature-icon {
+            width: 16px;
+            height: 16px;
+            background: var(--volunteer-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        .error-message {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: var(--accent);
+            font-size: 14px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .success-message {
+            background: rgba(40, 167, 69, 0.1);
+            border: 1px solid var(--volunteer-primary);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: var(--volunteer-primary);
+            font-size: 14px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .regular-login-link {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .regular-login-link a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .regular-login-link a:hover {
+            color: var(--volunteer-primary);
+        }
+
+        /* Responsive design */
+        @media (max-width: 480px) {
+            .volunteer-login-container {
+                padding: 32px 24px;
+                margin: 10px;
+            }
+
+            .volunteer-title {
+                font-size: 24px;
+            }
+
+            .features-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="volunteer-login-container">
+        <a href="../index.html" class="back-home-btn">
+            ← Back to Home
+        </a>
+
+        <div class="volunteer-header">
+            <div class="volunteer-icon">🤝</div>
+            <h1 class="volunteer-title">Volunteer Access</h1>
+            <p class="volunteer-subtitle">Welcome back, dedicated volunteer!</p>
+        </div>
+
+        <form class="volunteer-form" id="volunteerLoginForm">
+            <div class="form-group">
+                <label for="volunteerEmail" class="form-label">Volunteer Email</label>
+                <div class="input-wrapper">
+                    <input 
+                        type="email" 
+                        id="volunteerEmail" 
+                        name="email" 
+                        class="form-input" 
+                        placeholder="volunteer@eventease.com"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="volunteerPassword" class="form-label">Password</label>
+                <div class="input-wrapper">
+                    <input 
+                        type="password" 
+                        id="volunteerPassword" 
+                        name="password" 
+                        class="form-input" 
+                        placeholder="Enter your password"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div class="volunteer-code-group">
+                <div class="volunteer-code-label">
+                    🔐 Volunteer Access Code
+                </div>
+                <input 
+                    type="text" 
+                    id="volunteerAccessCode" 
+                    name="accessCode" 
+                    class="volunteer-code-input" 
+                    placeholder="Enter access code"
+                    maxlength="20"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="volunteer-login-btn" id="volunteerLoginBtn">
+                Access Volunteer Dashboard
+            </button>
+
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+        </form>
+
+        <div class="volunteer-features">
+            <h3 class="features-title">Volunteer Dashboard Features</h3>
+            <div class="features-list">
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>Event Management</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>QR Code Scanner</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>Attendee Check-in</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>Real-time Updates</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>Emergency Tools</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <span>Location Tracking</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="regular-login-link">
+            <a href="login.html">Not a volunteer? Regular login here</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth } from '../js/firebase.js';
+        import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+        class VolunteerLogin {
+            constructor() {
+                this.form = document.getElementById('volunteerLoginForm');
+                this.emailInput = document.getElementById('volunteerEmail');
+                this.passwordInput = document.getElementById('volunteerPassword');
+                this.accessCodeInput = document.getElementById('volunteerAccessCode');
+                this.loginBtn = document.getElementById('volunteerLoginBtn');
+                this.errorMessage = document.getElementById('errorMessage');
+                this.successMessage = document.getElementById('successMessage');
+
+                // Only keep the volunteer access code for authentication
+                this.VOLUNTEER_CODE = "VOL-SECRET-2025";
+
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.setupInputAnimations();
+            }
+
+            setupEventListeners() {
+                if (this.form) {
+                    this.form.addEventListener('submit', this.handleFormSubmit.bind(this));
+                }
+
+                // Auto-format access code input
+                if (this.accessCodeInput) {
+                    this.accessCodeInput.addEventListener('input', this.formatAccessCode.bind(this));
+                }
+            }
+
+            setupInputAnimations() {
+                const inputs = document.querySelectorAll('.form-input, .volunteer-code-input');
+                inputs.forEach(input => {
+                    input.addEventListener('focus', this.handleInputFocus.bind(this));
+                    input.addEventListener('blur', this.handleInputBlur.bind(this));
+                });
+            }
+
+            handleInputFocus(e) {
+                e.target.parentElement.style.transform = 'translateY(-2px)';
+            }
+
+            handleInputBlur(e) {
+                e.target.parentElement.style.transform = 'translateY(0)';
+            }
+
+            formatAccessCode(e) {
+                let value = e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+                e.target.value = value;
+            }
+
+            async handleFormSubmit(e) {
+                e.preventDefault();
+                
+                const email = this.emailInput.value.trim();
+                const password = this.passwordInput.value.trim();
+                const accessCode = this.accessCodeInput.value.trim();
+
+                this.hideMessages();
+
+                // Validation
+                if (!email || !password || !accessCode) {
+                    this.showError('Please fill in all fields');
+                    return;
+                }
+
+                if (password.length < 4) {
+                    this.showError('Password must be at least 4 characters');
+                    return;
+                }
+
+                // Show loading state
+                this.setLoadingState(true);
+
+                try {
+                    // Basic email format validation
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(email)) {
+                        throw new Error('Please enter a valid email address');
+                    }
+
+                    // Verify access code (main authentication for volunteers)
+                    if (accessCode !== this.VOLUNTEER_CODE) {
+                        throw new Error('Invalid volunteer access code');
+                    }
+
+                    // Set session data
+                    sessionStorage.setItem('loggedIn', 'true');
+                    sessionStorage.setItem('userName', email.split('@')[0]);
+                    sessionStorage.setItem('userEmail', email);
+                    sessionStorage.setItem('volunteerEmail', email);
+                    sessionStorage.setItem('role', 'volunteer');
+                    sessionStorage.setItem('volunteerAuthenticated', 'true');
+
+                    this.showSuccess('Login successful! Redirecting to volunteer dashboard...');
+
+                    // Redirect after success message directly to volunteer features
+                    setTimeout(() => {
+                        window.location.href = 'volunteer-dashboard.html';
+                    }, 2000);
+
+                } catch (error) {
+                    this.showError(error.message);
+                } finally {
+                    this.setLoadingState(false);
+                }
+            }
+
+            setLoadingState(loading) {
+                if (loading) {
+                    this.loginBtn.classList.add('loading');
+                    this.loginBtn.textContent = '';
+                } else {
+                    this.loginBtn.classList.remove('loading');
+                    this.loginBtn.textContent = 'Access Volunteer Dashboard';
+                }
+            }
+
+            showError(message) {
+                this.errorMessage.textContent = message;
+                this.errorMessage.style.display = 'block';
+                this.successMessage.style.display = 'none';
+            }
+
+            showSuccess(message) {
+                this.successMessage.textContent = message;
+                this.successMessage.style.display = 'block';
+                this.errorMessage.style.display = 'none';
+            }
+
+            hideMessages() {
+                this.errorMessage.style.display = 'none';
+                this.successMessage.style.display = 'none';
+            }
+        }
+
+        // Initialize volunteer login when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new VolunteerLogin();
+        });
+    </script>
+</body>
+</html>

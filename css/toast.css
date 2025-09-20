@@ -1,0 +1,114 @@
+/* Modern Toast Notifications */
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  min-width: 300px;
+  max-width: 500px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  transform: translateX(400px);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  z-index: 10000;
+  border-left: 4px solid #667eea;
+  backdrop-filter: blur(10px);
+}
+
+.toast.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.25rem;
+}
+
+.toast-icon {
+  font-size: 1.5rem;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+.toast-message {
+  flex: 1;
+  font-weight: 500;
+  color: #333;
+  line-height: 1.4;
+}
+
+/* Toast Types */
+.toast-success {
+  border-left-color: #4CAF50;
+}
+
+.toast-success .toast-icon {
+  color: #4CAF50;
+}
+
+.toast-error {
+  border-left-color: #FF6B6B;
+}
+
+.toast-error .toast-icon {
+  color: #FF6B6B;
+}
+
+.toast-warning {
+  border-left-color: #FF9800;
+}
+
+.toast-warning .toast-icon {
+  color: #FF9800;
+}
+
+.toast-info {
+  border-left-color: #2196F3;
+}
+
+.toast-info .toast-icon {
+  color: #2196F3;
+}
+
+/* Animation for multiple toasts */
+.toast:nth-child(2) {
+  top: 90px;
+}
+
+.toast:nth-child(3) {
+  top: 160px;
+}
+
+.toast:nth-child(4) {
+  top: 230px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .toast {
+    left: 20px;
+    right: 20px;
+    min-width: auto;
+    max-width: none;
+    transform: translateY(-100px);
+  }
+  
+  .toast.show {
+    transform: translateY(0);
+  }
+  
+  .toast:nth-child(2) {
+    top: 90px;
+  }
+  
+  .toast:nth-child(3) {
+    top: 160px;
+  }
+  
+  .toast:nth-child(4) {
+    top: 230px;
+  }
+}

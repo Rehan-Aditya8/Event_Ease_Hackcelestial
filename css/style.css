@@ -24,7 +24,9 @@ body{
   display:flex; align-items:center; justify-content:space-between; padding:0 16px;
 }
 .brand{display:flex; align-items:center; gap:10px; font-weight:700}
-.brand span{letter-spacing:.3px}
+.brand span{
+  color: black;
+  letter-spacing:.3px}
 .top-actions .btn{margin-left:8px}
 
 .sidebar{
@@ -577,6 +579,7 @@ body{
 }
 
 .announcement-form h3 {
+  color: white;
   margin-top: 0;
   margin-bottom: 15px;
   color: var(--text);
@@ -587,15 +590,17 @@ body{
 }
 
 .form-group label {
+  color: white;
   display: block;
   margin-bottom: 5px;
   font-weight: 500;
-  color: var(--text);
+  
 }
 
 .form-group input,
 .form-group textarea,
 .form-group select {
+  color: white;
   width: 100%;
   padding: 12px 14px;
   border: 1px solid #2a2a2a;

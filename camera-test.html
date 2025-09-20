@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        #video {
+            width: 100%;
+            max-width: 640px;
+            height: auto;
+            border: 2px solid #333;
+            background: #000;
+        }
+        
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .start { background: #4CAF50; color: white; }
+        .stop { background: #f44336; color: white; }
+        
+        #log {
+            background: #f5f5f5;
+            padding: 10px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Camera Test Page</h1>
+    
+    <div>
+        <button id="startBtn" class="start">Start Camera</button>
+        <button id="stopBtn" class="stop" disabled>Stop Camera</button>
+    </div>
+    
+    <div>
+        <video id="video" autoplay muted playsinline></video>
+    </div>
+    
+    <div id="log"></div>
+
+    <script>
+        const video = document.getElementById('video');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const logDiv = document.getElementById('log');
+        
+        let currentStream = null;
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        async function startCamera() {
+            log('=== Starting Camera ===');
+            
+            try {
+                // Check browser support
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error('Camera not supported');
+                }
+                
+                log('Browser supports camera access');
+                
+                // Check video element
+                log(`Video element: ${video ? 'Found' : 'Not found'}`);
+                log(`Video element ID: ${video?.id}`);
+                
+                startBtn.disabled = true;
+                startBtn.textContent = 'Requesting...';
+                
+                // Request camera
+                const constraints = {
+                    video: {
+                        width: { ideal: 640, min: 320 },
+                        height: { ideal: 480, min: 240 },
+                        facingMode: 'environment'
+                    }
+                };
+                
+                log(`Requesting camera with constraints: ${JSON.stringify(constraints)}`);
+                
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                log(`Stream obtained: ${stream ? 'Success' : 'Failed'}`);
+                log(`Stream tracks: ${stream.getTracks().length}`);
+                
+                currentStream = stream;
+                video.srcObject = stream;
+                
+                log('Video srcObject set, waiting for metadata...');
+                
+                // Wait for video ready
+                await new Promise((resolve, reject) => {
+                    video.onloadedmetadata = () => {
+                        log('Video metadata loaded');
+                        log(`Video dimensions: ${video.videoWidth}x${video.videoHeight}`);
+                        resolve();
+                    };
+                    
+                    video.onerror = (error) => {
+                        log(`Video error: ${error}`);
+                        reject(error);
+                    };
+                    
+                    setTimeout(() => {
+                        reject(new Error('Timeout waiting for video'));
+                    }, 10000);
+                });
+                
+                // Play video
+                log('Starting video playback...');
+                await video.play();
+                log('Video playing successfully!');
+                
+                // Update UI
+                startBtn.disabled = false;
+                startBtn.textContent = 'Start Camera';
+                stopBtn.disabled = false;
+                
+                log('=== Camera Started Successfully ===');
+                
+            } catch (error) {
+                log(`=== ERROR ===`);
+                log(`Error name: ${error.name}`);
+                log(`Error message: ${error.message}`);
+                log(`Error stack: ${error.stack}`);
+                
+                startBtn.disabled = false;
+                startBtn.textContent = 'Start Camera';
+                stopBtn.disabled = true;
+            }
+        }
+        
+        function stopCamera() {
+            log('=== Stopping Camera ===');
+            
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => {
+                    track.stop();
+                    log(`Stopped track: ${track.kind}`);
+                });
+                currentStream = null;
+            }
+            
+            video.srcObject = null;
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            
+            log('Camera stopped');
+        }
+        
+        startBtn.addEventListener('click', startCamera);
+        stopBtn.addEventListener('click', stopCamera);
+        
+        log('Camera test page loaded');
+        log(`User agent: ${navigator.userAgent}`);
+        log(`HTTPS: ${location.protocol === 'https:'}`);
+    </script>
+</body>
+</html>

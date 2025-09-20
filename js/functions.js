@@ -946,7 +946,7 @@ document.addEventListener("DOMContentLoaded", () => {
               id: `emergency-${Date.now()}`,
               userName: sessionStorage.getItem("userName") || "Anonymous User",
               timestamp: new Date().toISOString(),
-              location: pos
+              location: `${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`,
             };
             
             activeEmergencies.push(emergency);
@@ -1278,9 +1278,6 @@ if (logoutBtn) {
       sessionStorage.clear();
       localStorage.removeItem('eventease_announcements');
       // Keep theme preference intact
-      
-      // Show confirmation toast
-      showToast('Logged out successfully!');
       
       // Redirect to landing page after a short delay
       setTimeout(() => {

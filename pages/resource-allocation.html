@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resource Allocation - EventEase</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/resource-allocation.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-icon">🏗️</span>
+                <span class="brand-text">Resource Allocation</span>
+            </div>
+            <button class="mobile-menu-btn" id="mobile-menu-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+            <div class="nav-links">
+                <button class="btn ghost" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        
+        <!-- Mobile Navigation Overlay -->
+        <div class="nav-overlay" id="nav-overlay"></div>
+        <div class="mobile-menu" id="mobile-menu">
+            <div class="nav-links">
+                <button class="btn ghost" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header Section -->
+        <div class="page-header">
+            <div class="header-content">
+                <h1 class="page-title">
+                    <span class="title-icon">🏗️</span>
+                    Resource Allocation Center
+                </h1>
+                <p class="page-subtitle">AI-powered resource deployment based on real-time crowd analytics</p>
+            </div>
+            <div class="header-actions">
+                <button id="refresh-data" class="btn primary">
+                    <span class="btn-icon">🔄</span>
+                    Refresh Data
+                </button>
+                <button id="emergency-mode" class="btn danger">
+                    <span class="btn-icon">🚨</span>
+                    Emergency Mode
+                </button>
+            </div>
+        </div>
+
+        <!-- Status Overview -->
+        <div class="status-grid">
+            <div class="status-card">
+                <div class="status-icon success">👥</div>
+                <div class="status-info">
+                    <h3 id="total-attendees">2,847</h3>
+                    <p>Total Attendees</p>
+                </div>
+            </div>
+            <div class="status-card">
+                <div class="status-icon warning">📊</div>
+                <div class="status-info">
+                    <h3 id="crowd-density">Medium</h3>
+                    <p>Crowd Density</p>
+                </div>
+            </div>
+            <div class="status-card">
+                <div class="status-icon info">🛡️</div>
+                <div class="status-info">
+                    <h3 id="security-deployed">12</h3>
+                    <p>Security Personnel</p>
+                </div>
+            </div>
+            <div class="status-card">
+                <div class="status-icon danger">🚧</div>
+                <div class="status-info">
+                    <h3 id="barricades-deployed">8</h3>
+                    <p>Barricades Active</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Crowd Monitoring Panel -->
+            <div class="panel crowd-monitor">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <span class="panel-icon">📈</span>
+                        Live Crowd Monitoring
+                    </h2>
+                    <div class="panel-controls">
+                        <select id="time-range" class="select-input">
+                            <option value="1h">Last Hour</option>
+                            <option value="4h">Last 4 Hours</option>
+                            <option value="24h">Last 24 Hours</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <div class="crowd-visualization">
+                        <canvas id="crowd-chart" width="400" height="200"></canvas>
+                    </div>
+                    <div class="crowd-zones">
+                        <div class="zone-item">
+                            <div class="zone-indicator high"></div>
+                            <span class="zone-name">Main Stage</span>
+                            <span class="zone-count">1,247</span>
+                        </div>
+                        <div class="zone-item">
+                            <div class="zone-indicator medium"></div>
+                            <span class="zone-name">Food Court</span>
+                            <span class="zone-count">623</span>
+                        </div>
+                        <div class="zone-item">
+                            <div class="zone-indicator low"></div>
+                            <span class="zone-name">Entrance</span>
+                            <span class="zone-count">312</span>
+                        </div>
+                        <div class="zone-item">
+                            <div class="zone-indicator medium"></div>
+                            <span class="zone-name">Merchandise</span>
+                            <span class="zone-count">665</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resource Suggestions Panel -->
+            <div class="panel resource-suggestions">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <span class="panel-icon">🤖</span>
+                        AI Deployment Suggestions
+                    </h2>
+                    <div class="panel-status">
+                        <span class="status-indicator active"></span>
+                        <span>AI Active</span>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <div id="suggestions-list" class="suggestions-list">
+                        <!-- Suggestions will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resource Management Panel -->
+            <div class="panel resource-management">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <span class="panel-icon">⚙️</span>
+                        Resource Management
+                    </h2>
+                </div>
+                <div class="panel-content">
+                    <div class="resource-tabs">
+                        <button class="tab-btn active" data-tab="security">Security</button>
+                        <button class="tab-btn" data-tab="barricades">Barricades</button>
+                        <button class="tab-btn" data-tab="medical">Medical</button>
+                    </div>
+                    
+                    <div class="tab-content active" id="security-tab">
+                        <div class="resource-controls">
+                            <div class="resource-item">
+                                <span class="resource-name">Main Stage Security</span>
+                                <div class="resource-actions">
+                                    <button class="btn-icon decrease">-</button>
+                                    <span class="resource-count">4</span>
+                                    <button class="btn-icon increase">+</button>
+                                </div>
+                            </div>
+                            <div class="resource-item">
+                                <span class="resource-name">Entrance Security</span>
+                                <div class="resource-actions">
+                                    <button class="btn-icon decrease">-</button>
+                                    <span class="resource-count">3</span>
+                                    <button class="btn-icon increase">+</button>
+                                </div>
+                            </div>
+                            <div class="resource-item">
+                                <span class="resource-name">Roaming Patrol</span>
+                                <div class="resource-actions">
+                                    <button class="btn-icon decrease">-</button>
+                                    <span class="resource-count">5</span>
+                                    <button class="btn-icon increase">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="barricades-tab">
+                        <div class="resource-controls">
+                            <div class="resource-item">
+                                <span class="resource-name">Stage Barriers</span>
+                                <div class="resource-actions">
+                                    <button class="btn-icon decrease">-</button>
+                                    <span class="resource-count">3</span>
+                                    <button class="btn-icon increase">+</button>
+                                </div>
+                            </div>
+                            <div class="resource-item">
+                                <span class="resource-name">Queue Management</span>
+                                <div class="resource-actions">
+                                    <button class="btn-icon decrease">-</button>
+                                    <span class="resource-count">2</span>
+                                    <button class="btn-icon increase">+</button>
+                                </div>
+                            </div>
+                            <div class="resource-item">
+                                <span class="resource-name">Emergency Exits</span>
+                                <div class="resource-actions">
+                                    <button class="btn-icon decrease">-</button>
+                                    <span class="resource-count">3</span>
+                                    <button class="btn-icon increase">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="medical-tab">
+                        <div class="resource-controls">
+                            <div class="resource-item">
+                                <span class="resource-name">First Aid Stations</span>
+                                <div class="resource-actions">
+                                    <button class="btn-icon decrease">-</button>
+                                    <span class="resource-count">2</span>
+                                    <button class="btn-icon increase">+</button>
+                                </div>
+                            </div>
+                            <div class="resource-item">
+                                <span class="resource-name">Mobile Medics</span>
+                                <div class="resource-actions">
+                                    <button class="btn-icon decrease">-</button>
+                                    <span class="resource-count">3</span>
+                                    <button class="btn-icon increase">+</button>
+                                </div>
+                            </div>
+                            <div class="resource-item">
+                                <span class="resource-name">Emergency Response</span>
+                                <div class="resource-actions">
+                                    <button class="btn-icon decrease">-</button>
+                                    <span class="resource-count">1</span>
+                                    <button class="btn-icon increase">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Log Panel -->
+            <div class="panel activity-log">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <span class="panel-icon">📋</span>
+                        Activity Log
+                    </h2>
+                    <button class="btn ghost small" onclick="clearLog()">Clear</button>
+                </div>
+                <div class="panel-content">
+                    <div id="activity-log" class="log-container">
+                        <!-- Activity log entries will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Emergency Mode Modal -->
+    <div id="emergency-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚠️ Emergency Mode Activation</h2>
+            </div>
+            <div class="modal-body">
+                <p>This will immediately deploy maximum resources to all high-density areas and activate emergency protocols.</p>
+                <div class="emergency-actions">
+                    <div class="emergency-item">
+                        <span class="emergency-icon">👮</span>
+                        <span>Deploy all available security personnel</span>
+                    </div>
+                    <div class="emergency-item">
+                        <span class="emergency-icon">🚧</span>
+                        <span>Set up emergency crowd control barriers</span>
+                    </div>
+                    <div class="emergency-item">
+                        <span class="emergency-icon">🏥</span>
+                        <span>Position medical teams at critical points</span>
+                    </div>
+                </div>
+                <p><strong>Are you sure you want to proceed?</strong></p>
+            </div>
+            <div class="modal-actions">
+                <button class="btn danger" onclick="deployEmergencyResources()">
+                    Activate Emergency Mode
+                </button>
+                <button class="btn ghost" onclick="closeEmergencyModal()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/resource-allocation.js"></script>
+    <script src="../js/resource-allocation-mobile.js"></script>
+</body>
+</html>
