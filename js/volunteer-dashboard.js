@@ -2,6 +2,29 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM Content Loaded - Volunteer Dashboard');
     
+    // Theme Toggle Functionality
+    const themeToggle = document.getElementById("themeToggle");
+    const currentTheme = localStorage.getItem("theme") || "light";
+    
+    // Set initial theme
+    document.documentElement.setAttribute("data-theme", currentTheme);
+    
+    if (themeToggle) {
+        themeToggle.addEventListener("click", () => {
+            const currentTheme = document.documentElement.getAttribute("data-theme");
+            const newTheme = currentTheme === "dark" ? "light" : "dark";
+            
+            document.documentElement.setAttribute("data-theme", newTheme);
+            localStorage.setItem("theme", newTheme);
+            
+            // Add a subtle animation effect
+            document.body.style.transition = "background 0.3s ease";
+            setTimeout(() => {
+                document.body.style.transition = "";
+            }, 300);
+        });
+    }
+    
     // Check authentication
     const isAuthenticated = sessionStorage.getItem('volunteerAuthenticated');
     const userName = sessionStorage.getItem('userName') || 'Volunteer';
@@ -42,15 +65,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Handle navigation
     function showView(viewId) {
+        console.log('Showing view:', viewId);
+        
+        // Hide all views by adding hidden class
         views.forEach(view => {
+            view.classList.add('hidden');
             view.classList.remove('active');
         });
         
+        // Show target view by removing hidden class
         const targetView = document.getElementById(viewId);
         if (targetView) {
+            targetView.classList.remove('hidden');
             targetView.classList.add('active');
+            console.log('Target view found and shown:', viewId);
+        } else {
+            console.log('Target view not found:', viewId);
         }
         
+        // Update navigation button states
         navButtons.forEach(btn => {
             btn.classList.remove('active');
         });
@@ -887,72 +920,105 @@ let currentStream = null;
 let isScanning = false;
 
 async function startCameraWithDebug() {
-    addDebugLog('Starting camera initialization...', 'info');
+    addDebugLog('Starting camera with debug...', 'info');
     
     const video = document.getElementById('scanner-video');
     const startBtn = document.getElementById('start-camera');
     const stopBtn = document.getElementById('stop-camera');
+    const switchBtn = document.getElementById('switch-camera');
+    const statusElement = document.getElementById('scanner-status');
     
     if (!video) {
-        addDebugLog('CRITICAL: Video element not found!', 'error');
+        addDebugLog('Video element not found', 'error');
         return;
     }
-    
-    addDebugLog(`Video element found: ${video.tagName} with ID: ${video.id}`, 'success');
-    
+
     try {
-        // Check browser support
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            addDebugLog('ERROR: getUserMedia not supported in this browser', 'error');
-            return;
+        // Update UI state
+        if (startBtn) startBtn.classList.add('hidden');
+        if (stopBtn) stopBtn.classList.remove('hidden');
+        if (switchBtn) switchBtn.classList.remove('hidden');
+        
+        // Update status
+        if (statusElement) {
+            statusElement.innerHTML = '<span class="status-text">Starting camera...</span>';
+            statusElement.className = 'scanner-status';
         }
-        
-        addDebugLog('Browser supports getUserMedia', 'success');
-        
-        // Request camera access
-        addDebugLog('Requesting camera access...', 'info');
-        const stream = await navigator.mediaDevices.getUserMedia({
+
+        // Get available cameras
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(device => device.kind === 'videoinput');
+        addDebugLog(`Found ${videoDevices.length} video devices`, 'info');
+
+        // Try to get back camera first, then front camera
+        let constraints = {
             video: {
-                facingMode: 'environment',
+                facingMode: { ideal: 'environment' }, // Back camera
                 width: { ideal: 1280 },
                 height: { ideal: 720 }
             }
-        });
-        
-        addDebugLog('Camera access granted successfully', 'success');
-        addDebugLog(`Stream tracks: ${stream.getVideoTracks().length}`, 'info');
-        
-        // Set up video element
-        video.srcObject = stream;
-        currentStream = stream;
-        
-        addDebugLog('Video stream assigned to element', 'success');
-        
-        // Wait for video to load
-        video.onloadedmetadata = () => {
-            addDebugLog(`Video metadata loaded - Size: ${video.videoWidth}x${video.videoHeight}`, 'success');
         };
-        
-        video.onplay = () => {
-            addDebugLog('Video playback started', 'success');
-        };
-        
-        // Update button states
-        if (startBtn) {
-            startBtn.classList.add('hidden');
-            addDebugLog('Start button hidden', 'info');
+
+        try {
+            currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+            addDebugLog('Back camera accessed successfully', 'success');
+        } catch (backCameraError) {
+            addDebugLog('Back camera failed, trying front camera', 'warning');
+            constraints.video.facingMode = { ideal: 'user' }; // Front camera
+            currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+            addDebugLog('Front camera accessed successfully', 'success');
         }
-        if (stopBtn) {
-            stopBtn.classList.remove('hidden');
-            addDebugLog('Stop button shown', 'info');
-        }
-        
+
+        video.srcObject = currentStream;
         isScanning = true;
+
+        // Update status to scanning
+        if (statusElement) {
+            statusElement.innerHTML = '<span class="status-text">Camera active - Scanning for QR codes</span>';
+            statusElement.className = 'scanner-status scanning';
+        }
+
+        // Wait for video to be ready
+        video.addEventListener('loadedmetadata', () => {
+            addDebugLog(`Video dimensions: ${video.videoWidth}x${video.videoHeight}`, 'info');
+            // Start QR detection after video is ready
+            setTimeout(() => {
+                if (isScanning) {
+                    startQRDetection();
+                }
+            }, 500);
+        });
+
         addDebugLog('Camera started successfully', 'success');
-        
+        showToast('Camera started successfully', 'success');
+
     } catch (error) {
-        addDebugLog(`Camera error: ${error.name} - ${error.message}`, 'error');
-        console.error('Camera error:', error);
+        addDebugLog(`Camera error: ${error.message}`, 'error');
+        console.error('Camera access error:', error);
+        
+        // Update status to error
+        if (statusElement) {
+            statusElement.innerHTML = '<span class="status-text">Camera access failed</span>';
+            statusElement.className = 'scanner-status error';
+        }
+        
+        // Reset UI state
+        if (startBtn) startBtn.classList.remove('hidden');
+        if (stopBtn) stopBtn.classList.add('hidden');
+        if (switchBtn) switchBtn.classList.add('hidden');
+        
+        isScanning = false;
+        
+        let errorMessage = 'Camera access failed. ';
+        if (error.name === 'NotAllowedError') {
+            errorMessage += 'Please allow camera permissions and try again.';
+        } else if (error.name === 'NotFoundError') {
+            errorMessage += 'No camera found on this device.';
+        } else {
+            errorMessage += 'Please check your camera and try again.';
+        }
+        
+        showToast(errorMessage, 'error');
     }
 }
 
@@ -962,6 +1028,8 @@ function stopCameraWithDebug() {
     const video = document.getElementById('scanner-video');
     const startBtn = document.getElementById('start-camera');
     const stopBtn = document.getElementById('stop-camera');
+    const switchBtn = document.getElementById('switch-camera');
+    const statusElement = document.getElementById('scanner-status');
     
     if (currentStream) {
         currentStream.getTracks().forEach(track => {
@@ -985,9 +1053,20 @@ function stopCameraWithDebug() {
         stopBtn.classList.add('hidden');
         addDebugLog('Stop button hidden', 'info');
     }
+    if (switchBtn) {
+        switchBtn.classList.add('hidden');
+        addDebugLog('Switch button hidden', 'info');
+    }
+    
+    // Update status
+    if (statusElement) {
+        statusElement.innerHTML = '<span class="status-text">Camera stopped</span>';
+        statusElement.className = 'scanner-status';
+    }
     
     isScanning = false;
     addDebugLog('Camera stopped successfully', 'success');
+    showToast('Camera stopped', 'info');
 }
 
 // Ticket Scanner Functionality
@@ -1079,6 +1158,15 @@ function initializeTicketScanner() {
         });
     }
     
+    // Switch camera button
+    const switchCameraBtn = document.getElementById('switch-camera');
+    if (switchCameraBtn) {
+        switchCameraBtn.addEventListener('click', () => {
+            console.log('Switch camera button clicked');
+            switchCamera();
+        });
+    }
+    
     // Debug toggle functionality
     const toggleDebugBtn = document.getElementById('toggle-debug');
     if (toggleDebugBtn) {
@@ -1123,20 +1211,27 @@ function initializeTicketScanner() {
     }
 
     function startQRDetection() {
+        const video = document.getElementById('scanner-video');
+        const canvas = document.getElementById('scanner-canvas') || document.createElement('canvas');
+        const statusElement = document.getElementById('scanner-status');
+        
+        if (!video) {
+            addDebugLog('Video element not found for QR detection', 'error');
+            return;
+        }
+
         if (!scannerActive || !currentStream) {
             addDebugLog('QR Detection not started - scanner inactive or no stream', 'warning');
             return;
         }
 
-        addDebugLog('Starting QR detection loop', 'info');
-        const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
         let scanCount = 0;
         
-        function scan() {
-            if (!scannerActive || !scannerVideo.videoWidth || !scannerVideo.videoHeight) {
+        function detectQR() {
+            if (!scannerActive || !video.videoWidth || !video.videoHeight) {
                 if (scannerActive) {
-                    requestAnimationFrame(scan);
+                    requestAnimationFrame(detectQR);
                 }
                 return;
             }
@@ -1146,17 +1241,31 @@ function initializeTicketScanner() {
                 addDebugLog(`QR scan attempt #${scanCount}`, 'info');
             }
 
-            canvas.width = scannerVideo.videoWidth;
-            canvas.height = scannerVideo.videoHeight;
-            context.drawImage(scannerVideo, 0, 0, canvas.width, canvas.height);
-            
+            // Set canvas dimensions to match video
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            // Draw video frame to canvas
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Get image data for QR detection
             const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-            
+
+            // Use jsQR to detect QR codes
             if (typeof jsQR !== 'undefined') {
-                const code = jsQR(imageData.data, imageData.width, imageData.height);
-                
+                const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: "dontInvert",
+                });
+
                 if (code) {
                     addDebugLog(`QR Code detected: ${code.data}`, 'success');
+                    
+                    // Update status
+                    if (statusElement) {
+                        statusElement.innerHTML = '<span class="status-text">QR Code detected!</span>';
+                        statusElement.className = 'scanner-status success';
+                    }
+                    
                     handleQRDetection(code.data);
                     return;
                 }
@@ -1167,11 +1276,87 @@ function initializeTicketScanner() {
             }
             
             if (scannerActive) {
-                requestAnimationFrame(scan);
+                requestAnimationFrame(detectQR);
             }
         }
         
-        requestAnimationFrame(scan);
+        addDebugLog('Starting QR detection loop', 'info');
+        requestAnimationFrame(detectQR);
+    }
+
+    async function switchCamera() {
+        const switchBtn = document.getElementById('switch-camera');
+        const statusElement = document.getElementById('scanner-status');
+        
+        if (!currentStream) {
+            addDebugLog('No active stream to switch', 'warning');
+            return;
+        }
+
+        try {
+            // Disable button during switch
+            if (switchBtn) switchBtn.disabled = true;
+            
+            // Update status
+            if (statusElement) {
+                statusElement.innerHTML = '<span class="status-text">Switching camera...</span>';
+                statusElement.className = 'scanner-status';
+            }
+
+            // Get current facing mode
+            const currentTrack = currentStream.getVideoTracks()[0];
+            const currentSettings = currentTrack.getSettings();
+            const currentFacingMode = currentSettings.facingMode;
+            
+            addDebugLog(`Current facing mode: ${currentFacingMode}`, 'info');
+
+            // Stop current stream
+            currentStream.getTracks().forEach(track => track.stop());
+
+            // Switch to opposite camera
+            const newFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+            
+            const constraints = {
+                video: {
+                    facingMode: { ideal: newFacingMode },
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
+            };
+
+            const video = document.getElementById('scanner-video');
+            currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+            video.srcObject = currentStream;
+
+            addDebugLog(`Switched to ${newFacingMode} camera`, 'success');
+            
+            // Update status back to scanning
+            if (statusElement) {
+                statusElement.innerHTML = '<span class="status-text">Camera active - Scanning for QR codes</span>';
+                statusElement.className = 'scanner-status scanning';
+            }
+
+            // Restart QR detection
+            setTimeout(() => {
+                if (scannerActive) {
+                    startQRDetection();
+                }
+            }, 500);
+
+        } catch (error) {
+            addDebugLog(`Camera switch error: ${error.message}`, 'error');
+            
+            // Update status to error
+            if (statusElement) {
+                statusElement.innerHTML = '<span class="status-text">Camera switch failed</span>';
+                statusElement.className = 'scanner-status error';
+            }
+            
+            showToast('Failed to switch camera', 'error');
+        } finally {
+            // Re-enable button
+            if (switchBtn) switchBtn.disabled = false;
+        }
     }
 
     function generateMockTicketCode() {
@@ -1316,4 +1501,124 @@ function initializeTicketScanner() {
     
     // Initialize debug logging
     addDebugLog('Ticket scanner initialized successfully', 'success');
+}
+
+function processQRResult(qrData) {
+    addDebugLog(`Processing QR result: ${qrData}`, 'info');
+    
+    try {
+        // Validate QR code data
+        if (!qrData || qrData.trim() === '') {
+            throw new Error('Empty QR code data');
+        }
+
+        // Try to parse as JSON first (for structured ticket data)
+        let ticketData;
+        try {
+            ticketData = JSON.parse(qrData);
+            addDebugLog('QR data parsed as JSON', 'success');
+        } catch (jsonError) {
+            // If not JSON, treat as plain text ticket ID
+            ticketData = { ticketId: qrData.trim() };
+            addDebugLog('QR data treated as plain text ticket ID', 'info');
+        }
+
+        // Display scan result
+        displayScanResult(ticketData);
+        
+        // Update statistics
+        updateScanStats('success');
+        
+        // Show success message
+        showToast('QR code scanned successfully!', 'success');
+        
+        addDebugLog('QR result processed successfully', 'success');
+
+    } catch (error) {
+        addDebugLog(`Error processing QR result: ${error.message}`, 'error');
+        
+        // Update statistics
+        updateScanStats('error');
+        
+        // Show error message
+        showToast('Failed to process QR code', 'error');
+        
+        // Display error result
+        displayScanResult({ error: 'Invalid QR code format' });
+    }
+}
+
+function displayScanResult(data) {
+    const resultDiv = document.getElementById('scan-result');
+    if (!resultDiv) {
+        addDebugLog('Scan result element not found', 'error');
+        return;
+    }
+
+    let resultHTML = '<div class="scan-result-content">';
+    
+    if (data.error) {
+        resultHTML += `
+            <div class="result-status error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Scan Error</span>
+            </div>
+            <div class="result-details">
+                <p><strong>Error:</strong> ${data.error}</p>
+            </div>
+        `;
+    } else {
+        resultHTML += `
+            <div class="result-status success">
+                <i class="fas fa-check-circle"></i>
+                <span>Scan Successful</span>
+            </div>
+            <div class="result-details">
+                <p><strong>Ticket ID:</strong> ${data.ticketId || 'Unknown'}</p>
+                ${data.eventName ? `<p><strong>Event:</strong> ${data.eventName}</p>` : ''}
+                ${data.attendeeName ? `<p><strong>Attendee:</strong> ${data.attendeeName}</p>` : ''}
+                ${data.seatNumber ? `<p><strong>Seat:</strong> ${data.seatNumber}</p>` : ''}
+                <p><strong>Scanned:</strong> ${new Date().toLocaleString()}</p>
+            </div>
+        `;
+    }
+    
+    resultHTML += '</div>';
+    resultDiv.innerHTML = resultHTML;
+    resultDiv.style.display = 'block';
+    
+    addDebugLog('Scan result displayed', 'info');
+}
+
+function updateScanStats(result) {
+    const statsElements = {
+        total: document.getElementById('total-scans'),
+        valid: document.getElementById('valid-scans'),
+        invalid: document.getElementById('invalid-scans')
+    };
+
+    // Update internal counters
+    if (!window.scanStats) {
+        window.scanStats = { total: 0, valid: 0, invalid: 0 };
+    }
+
+    window.scanStats.total++;
+    if (result === 'success') {
+        window.scanStats.valid++;
+    } else {
+        window.scanStats.invalid++;
+    }
+
+    // Update UI elements
+    if (statsElements.total) {
+        statsElements.total.textContent = window.scanStats.total;
+    }
+    if (statsElements.valid) {
+        statsElements.valid.textContent = window.scanStats.valid;
+    }
+    if (statsElements.invalid) {
+        statsElements.invalid.textContent = window.scanStats.invalid;
+    }
+    
+    addDebugLog(`Stats updated - Total: ${window.scanStats.total}, Valid: ${window.scanStats.valid}, Invalid: ${window.scanStats.invalid}`, 'info');
 }

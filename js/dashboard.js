@@ -250,6 +250,183 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Enhanced QR Scanner functionality for user dashboard
+    let scannerStream = null;
+    let isScanning = false;
+    let currentCamera = 'environment'; // 'user' for front camera, 'environment' for back camera
+
+    // Get scanner elements
+    const startCameraBtn = document.getElementById('start-camera');
+    const stopCameraBtn = document.getElementById('stop-camera');
+    const switchCameraBtn = document.getElementById('switch-camera');
+    const scannerStatus = document.getElementById('scanner-status');
+    const scannerPreview = document.getElementById('scanner-preview');
+    const closeScannerBtn = document.getElementById('close-scanner');
+    const resetScannerBtn = document.getElementById('reset-scanner');
+
+    // Initialize scanner event listeners
+    if (startCameraBtn) {
+        startCameraBtn.addEventListener('click', startCamera);
+    }
+    if (stopCameraBtn) {
+        stopCameraBtn.addEventListener('click', stopCamera);
+    }
+    if (switchCameraBtn) {
+        switchCameraBtn.addEventListener('click', switchCamera);
+    }
+    if (closeScannerBtn) {
+        closeScannerBtn.addEventListener('click', closeScannerView);
+    }
+    if (resetScannerBtn) {
+        resetScannerBtn.addEventListener('click', resetScanner);
+    }
+
+    async function startCamera() {
+        try {
+            updateScannerStatus('Requesting camera access...', 'scanning');
+            
+            const constraints = {
+                video: {
+                    facingMode: currentCamera,
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
+            };
+
+            scannerStream = await navigator.mediaDevices.getUserMedia(constraints);
+            scannerPreview.srcObject = scannerStream;
+            
+            await scannerPreview.play();
+            
+            // Update UI
+            startCameraBtn.style.display = 'none';
+            stopCameraBtn.style.display = 'inline-flex';
+            switchCameraBtn.style.display = 'inline-flex';
+            
+            updateScannerStatus('Camera active - Position QR code in frame', 'scanning');
+            
+            // Start QR detection
+            isScanning = true;
+            detectQRCode();
+            
+            showToast('Camera started successfully', 'success');
+        } catch (error) {
+            console.error('Camera access error:', error);
+            updateScannerStatus('Camera access denied', 'error');
+            showToast('Unable to access camera. Please check permissions.', 'error');
+        }
+    }
+
+    function stopCamera() {
+        if (scannerStream) {
+            scannerStream.getTracks().forEach(track => track.stop());
+            scannerStream = null;
+        }
+        
+        if (scannerPreview) {
+            scannerPreview.srcObject = null;
+        }
+        
+        isScanning = false;
+        
+        // Update UI
+        startCameraBtn.style.display = 'inline-flex';
+        stopCameraBtn.style.display = 'none';
+        switchCameraBtn.style.display = 'none';
+        
+        updateScannerStatus('Camera stopped', '');
+        showToast('Camera stopped', 'info');
+    }
+
+    async function switchCamera() {
+        if (!scannerStream) return;
+        
+        // Stop current stream
+        stopCamera();
+        
+        // Switch camera mode
+        currentCamera = currentCamera === 'environment' ? 'user' : 'environment';
+        
+        // Start with new camera
+        setTimeout(() => {
+            startCamera();
+        }, 500);
+        
+        showToast(`Switched to ${currentCamera === 'environment' ? 'back' : 'front'} camera`, 'info');
+    }
+
+    function updateScannerStatus(message, type = '') {
+        if (scannerStatus) {
+            const statusText = scannerStatus.querySelector('.status-text');
+            if (statusText) {
+                statusText.textContent = message;
+            }
+            
+            // Remove existing status classes
+            scannerStatus.classList.remove('scanning', 'error');
+            
+            // Add new status class
+            if (type) {
+                scannerStatus.classList.add(type);
+            }
+        }
+    }
+
+    function detectQRCode() {
+        if (!isScanning || !scannerPreview || scannerPreview.readyState !== 4) {
+            if (isScanning) {
+                setTimeout(detectQRCode, 100);
+            }
+            return;
+        }
+
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = scannerPreview.videoWidth;
+        canvas.height = scannerPreview.videoHeight;
+        
+        context.drawImage(scannerPreview, 0, 0, canvas.width, canvas.height);
+        
+        try {
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
+            
+            if (code) {
+                handleQRScanResult(code.data);
+                return;
+            }
+        } catch (error) {
+            console.error('QR detection error:', error);
+        }
+
+        // Continue scanning if no result found and scanner is still active
+        if (isScanning && !scanResult.classList.contains('hidden')) {
+            return; // Stop scanning if result is shown
+        }
+
+        if (isScanning) {
+            setTimeout(detectQRCode, 100);
+        }
+    }
+
+    function closeScannerView() {
+        stopCamera();
+        volunteerScanner.classList.add('hidden');
+        volunteerOptions.classList.remove('hidden');
+        scanResult.classList.add('hidden');
+    }
+
+    function resetScanner() {
+        scanResult.classList.add('hidden');
+        updateScannerStatus('Ready to scan', '');
+        
+        // Restart scanning if camera is active
+        if (scannerStream && !isScanning) {
+            isScanning = true;
+            detectQRCode();
+        }
+    }
+
     async function startQRScanner() {
         try {
             volunteerOptions.classList.add('hidden');

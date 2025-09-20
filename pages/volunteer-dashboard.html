@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Volunteer Dashboard – EventEase</title>
   <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/functions.css" />
   <link rel="stylesheet" href="../css/dashboard.css" />
   <link rel="stylesheet" href="../css/styles.css">
   <link rel="stylesheet" href="../css/volunteer-dashboard.css">
@@ -37,6 +38,22 @@
       </button>
     </div>
     <nav class="top-actions">
+      <button id="themeToggle" class="btn ghost theme-toggle" title="Toggle theme">
+        <svg class="theme-icon sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg class="theme-icon moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
       <a href="../index.html" class="btn ghost" title="Home">Home</a>
       <button id="logoutBtn" class="btn ghost" title="Logout">Logout</button>
     </nav>
@@ -350,10 +367,21 @@
             <div class="scanner-area">
               <div id="scanner-preview" class="scanner-preview">
                 <div class="scanner-overlay">
-                  <div class="scanner-frame"></div>
+                  <div class="scanner-frame">
+                    <div class="scanner-corners">
+                      <div class="corner top-left"></div>
+                      <div class="corner top-right"></div>
+                      <div class="corner bottom-left"></div>
+                      <div class="corner bottom-right"></div>
+                    </div>
+                  </div>
                   <p class="scanner-instruction">Position QR code within the frame</p>
+                  <div class="scanner-status" id="scanner-status">
+                    <span class="status-text">Camera not started</span>
+                  </div>
                 </div>
                 <video id="scanner-video" autoplay muted playsinline></video>
+                <canvas id="scanner-canvas" style="display: none;"></canvas>
               </div>
               <div class="scanner-controls">
                 <button id="start-camera" class="btn primary scanner-btn">
@@ -364,6 +392,26 @@
                   <span class="btn-icon">⏹️</span>
                   Stop Camera
                 </button>
+                <button id="switch-camera" class="btn ghost scanner-btn hidden">
+                  <span class="btn-icon">🔄</span>
+                  Switch Camera
+                </button>
+              </div>
+              
+              <!-- Scanner Info -->
+              <div class="scanner-info">
+                <div class="info-item">
+                  <span class="info-icon">📱</span>
+                  <span class="info-text">Hold your device steady</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-icon">🎯</span>
+                  <span class="info-text">Align QR code within the frame</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-icon">💡</span>
+                  <span class="info-text">Ensure good lighting</span>
+                </div>
               </div>
               
               <!-- Debug Log Area -->
@@ -510,32 +558,174 @@
         <button type="button" class="btn ghost back" data-view="dashboard">← Back</button>
       </div>
       <h2 class="view-title">🔎 Lost & Found</h2>
-      
-      <div class="chat-container">
-        <div id="chatBox" class="chat-box">
-          <!-- Chat messages will appear here -->
-        </div>
-        
-        <form id="chatForm" class="chat-form">
-          <input type="text" id="chatName" placeholder="Your name" required />
-          <input type="text" id="chatMessage" placeholder="Describe the lost item or report found item..." required />
-          <input type="file" id="chatImage" accept="image/*" />
-          <button type="submit" class="btn primary">Send</button>
-        </form>
-      </div>
 
       <!-- Volunteer Lost & Found Management -->
-      <div class="volunteer-lostfound card">
-        <h3>Volunteer Management</h3>
-        <div id="volunteerChatBox" class="chat-box">
-          <!-- Volunteer chat messages will appear here -->
+      <div id="volunteer-lostfound" class="volunteer-lostfound">
+        <div class="lostfound-tabs">
+          <button class="tab-btn active" data-tab="chat">Chat View</button>
+          <button class="tab-btn" data-tab="manage">Manage Items</button>
+          <button class="tab-btn" data-tab="reports">Reports</button>
         </div>
-        
-        <form id="volunteerChatForm" class="chat-form">
-          <input type="text" id="volunteerChatName" placeholder="Volunteer name" required />
-          <input type="text" id="volunteerChatMessage" placeholder="Update on lost/found items..." required />
-          <input type="file" id="volunteerChatImage" accept="image/*" />
-          <button type="submit" class="btn primary">Send Update</button>
+
+        <!-- Chat Tab -->
+        <div id="chat-tab" class="tab-content active">
+          <div class="volunteer-chat-header">
+            <h3>Chat</h3>
+            <div class="chat-stats">
+              <span>Active Users: <strong id="active-users">3</strong></span>
+              <span>Messages: <strong id="total-messages">12</strong></span>
+            </div>
+          </div>
+          
+          <!-- Chat Messages Container -->
+          <div id="volunteerChatBox" class="chat-messages-container">
+            <!-- Sample messages to match the design -->
+            <div class="chat-message">
+              <div class="message-avatar">
+                <div class="avatar-circle" style="background-color: #6366f1;">S</div>
+              </div>
+              <div class="message-content">
+                <div class="message-header">
+                  <span class="message-sender">sugv</span>
+                  <span class="message-time">06:15 AM</span>
+                </div>
+                <div class="message-text">fewdc</div>
+              </div>
+            </div>
+            
+            <div class="chat-message">
+              <div class="message-avatar">
+                <div class="avatar-circle" style="background-color: #8b5cf6;">F</div>
+              </div>
+              <div class="message-content">
+                <div class="message-header">
+                  <span class="message-sender">frfbvbl</span>
+                  <span class="message-time">08:52 AM</span>
+                </div>
+                <div class="message-text">gtfh</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Chat Input Form -->
+          <div class="chat-input-container">
+            <form id="volunteerChatForm" class="chat-input-form">
+              <input type="text" id="volunteerChatName" placeholder="Your name" required />
+              <input type="text" id="volunteerChatMessage" placeholder="Describe the lost/found item..." required />
+              <input type="file" id="volunteerChatImage" accept="image/*" class="file-input" />
+              <button type="submit" class="btn primary send-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13"/>
+                  <polygon points="22,2 15,22 11,13 2,9 22,2"/>
+                </svg>
+                Send
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Manage Items Tab -->
+        <div id="manage-tab" class="tab-content">
+          <div class="manage-header">
+            <h3>Lost & Found Item Management</h3>
+            <button id="addItemBtn" class="btn primary">+ Add Found Item</button>
+          </div>
+          
+          <div class="items-filters">
+            <button class="filter-btn active" data-filter="all">All Items</button>
+            <button class="filter-btn" data-filter="lost">Lost</button>
+            <button class="filter-btn" data-filter="found">Found</button>
+            <button class="filter-btn" data-filter="returned">Returned</button>
+          </div>
+
+          <div id="itemsList" class="items-list">
+            <!-- Items will be populated here -->
+          </div>
+
+          <!-- Add Item Modal -->
+          <div id="addItemModal" class="modal hidden">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h3>Add Found Item</h3>
+                <button id="closeModal" class="close-btn">&times;</button>
+              </div>
+              <form id="addItemForm" class="modal-form">
+                <div class="form-group">
+                  <label for="itemName">Item Name</label>
+                  <input type="text" id="itemName" placeholder="e.g., Blue Backpack" required>
+                </div>
+                <div class="form-group">
+                  <label for="itemDescription">Description</label>
+                  <textarea id="itemDescription" placeholder="Detailed description..." rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                  <label for="itemLocation">Found Location</label>
+                  <input type="text" id="itemLocation" placeholder="e.g., Main Hall, Room 301" required>
+                </div>
+                <div class="form-group">
+                  <label for="itemCategory">Category</label>
+                  <select id="itemCategory" required>
+                    <option value="">Select category</option>
+                    <option value="electronics">Electronics</option>
+                    <option value="clothing">Clothing</option>
+                    <option value="accessories">Accessories</option>
+                    <option value="documents">Documents</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="itemImage">Item Photo (Optional)</label>
+                  <input type="file" id="itemImage" accept="image/*">
+                </div>
+                <div class="modal-actions">
+                  <button type="button" id="cancelAdd" class="btn ghost">Cancel</button>
+                  <button type="submit" class="btn primary">Add Item</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div id="reports-tab" class="tab-content">
+          <div class="reports-header">
+            <h3>Lost & Found Reports</h3>
+            <div class="date-filter">
+              <label for="reportDate">Filter by Date:</label>
+              <input type="date" id="reportDate" />
+              <button id="generateReport" class="btn secondary">Generate Report</button>
+            </div>
+          </div>
+          
+          <div class="reports-summary">
+            <div class="summary-card">
+              <div class="summary-number" id="totalItems">0</div>
+              <div class="summary-label">Total Items</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-number" id="returnedItems">0</div>
+              <div class="summary-label">Returned</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-number" id="pendingItems">0</div>
+              <div class="summary-label">Pending</div>
+            </div>
+          </div>
+
+          <div id="reportsList" class="reports-list">
+            <!-- Reports will be populated here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- User Lost & Found Chat (Original) -->
+      <div id="user-lostfound" class="user-lostfound">
+        <div id="chatBox" class="chat-box"></div>
+        <form id="chatForm" class="chat-form">
+          <input type="text" id="chatName" placeholder="Your name" required />
+          <input type="text" id="chatMessage" placeholder="Type a message..." required />
+          <input type="file" id="chatImage" accept="image/*" />
+          <button type="submit" class="btn primary">Send</button>
         </form>
       </div>
     </section>

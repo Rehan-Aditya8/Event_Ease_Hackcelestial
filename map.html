@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Map with Live Tracking</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        
+        #map {
+            height: 600px;
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .info-popup {
+            max-width: 280px;
+            font-family: Arial, sans-serif;
+        }
+        
+        .popup-title {
+            font-weight: bold;
+            color: #1976d2;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .popup-address {
+            color: #666;
+            margin-bottom: 8px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .popup-rating {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .stars {
+            color: #ff9800;
+            margin-right: 8px;
+        }
+        
+        .rating-text {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .popup-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .popup-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .directions-btn {
+            background-color: #1976d2;
+            color: white;
+        }
+        
+        .website-btn {
+            background-color: #f0f0f0;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        
+        .popup-btn:hover {
+            opacity: 0.8;
+        }
+        
+        .location-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            background-color: white;
+            border: 2px solid rgba(0,0,0,0.2);
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-width: 140px;
+            justify-content: center;
+        }
+        
+        .control-btn:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .control-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .control-btn.active {
+            background-color: #4285f4;
+            color: white;
+            border-color: #4285f4;
+        }
+        
+        .status-indicator {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background-color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #ccc;
+        }
+        
+        .status-dot.tracking {
+            background-color: #4caf50;
+            animation: pulse-dot 2s infinite;
+        }
+        
+        .status-dot.error {
+            background-color: #f44336;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+        }
+        
+        @keyframes pulse-dot {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.3);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .current-location-marker {
+            z-index: 1000;
+        }
+        
+        .location-trail {
+            color: #4285f4;
+            opacity: 0.6;
+            weight: 3;
+        }
+        
+        .custom-marker {
+            background-color: #dc4545;
+            border: 3px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive Map with Live Location Tracking</h1>
+    <div style="position: relative;">
+        <div id="map"></div>
+        
+        <div class="status-indicator">
+            <div id="status-dot" class="status-dot"></div>
+            <span id="status-text">Location tracking off</span>
+        </div>
+        
+        <div class="location-controls">
+            <button id="track-btn" class="control-btn" onclick="toggleTracking()">
+                🎯 Start Live Tracking
+            </button>
+            <button id="location-btn" class="control-btn" onclick="getCurrentLocation()">
+                📍 Get Current Location
+            </button>
+            <button id="clear-trail-btn" class="control-btn" onclick="clearTrail()">
+                🗑 Clear Trail
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script>
+        // Initialize the map - using Mumbai coordinates as center
+        const map = L.map('map').setView([19.0760, 72.8777], 13);
+
+        // Add tile layer (OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Define locations with detailed information (currently empty - add your own locations here)
+        const locations = [];
+
+        // Tracking variables
+        let isTracking = false;
+        let watchId = null;
+        let currentLocationMarker = null;
+        let locationTrail = [];
+        let trailPolyline = null;
+        let lastUpdateTime = 0;
+        const UPDATE_INTERVAL = 5000; // 5 seconds minimum between updates
+
+        // Status elements
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+        const trackBtn = document.getElementById('track-btn');
+
+        // Function to update status indicator
+        function updateStatus(status, message) {
+            statusDot.className = status-dot ${status};
+            statusText.textContent = message;
+        }
+
+        // Function to create custom markers based on type
+        function createCustomMarker(type) {
+            let color = '#dc4545'; // default red
+            
+            switch(type) {
+                case 'hospital':
+                    color = '#2196f3'; // blue
+                    break;
+                case 'market':
+                    color = '#4caf50'; // green
+                    break;
+                case 'restaurant':
+                    color = '#ff9800'; // orange
+                    break;
+                case 'university':
+                    color = '#9c27b0'; // purple
+                    break;
+            }
+            
+            return L.divIcon({
+                className: 'custom-div-icon',
+                html: <div style="background-color: ${color}; border: 3px solid white; border-radius: 50%; width: 24px; height: 24px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>,
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            });
+        }
+
+        // Function to generate star rating
+        function generateStars(rating) {
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 !== 0;
+            let stars = '';
+            
+            for (let i = 0; i < fullStars; i++) {
+                stars += '★';
+            }
+            if (hasHalfStar) {
+                stars += '☆';
+            }
+            
+            return stars;
+        }
+
+        // Add markers for each location (currently none)
+        locations.forEach(location => {
+            const marker = L.marker([location.lat, location.lng], {
+                icon: createCustomMarker(location.type)
+            }).addTo(map);
+            
+            // Create popup content
+            const popupContent = `
+                <div class="info-popup">
+                    <div class="popup-title">${location.name}</div>
+                    <div class="popup-address">${location.address}</div>
+                    <div class="popup-rating">
+                        <span class="stars">${generateStars(location.rating)}</span>
+                        <span class="rating-text">${location.rating} • ${location.reviews} reviews</span>
+                    </div>
+                    <div class="popup-buttons">
+                        <button class="popup-btn directions-btn" onclick="getDirections(${location.lat}, ${location.lng})">Directions</button>
+                        <button class="popup-btn website-btn" onclick="viewLargerMap(${location.lat}, ${location.lng})">View on Map</button>
+                    </div>
+                </div>
+            `;
+            
+            marker.bindPopup(popupContent);
+        });
+
+        // Function to create current location marker
+        function createCurrentLocationMarker() {
+            return L.divIcon({
+                className: 'current-location-marker',
+                html: `
+                    <div style="position: relative;">
+                        <div style="width: 20px; height: 20px; background: #4285f4; border: 3px solid white; border-radius: 50%; box-shadow: 0 2px 8px rgba(66, 133, 244, 0.4);"></div>
+                        <div style="position: absolute; top: -15px; left: -15px; width: 50px; height: 50px; border: 2px solid #4285f4; border-radius: 50%; opacity: 0.3; animation: pulse 2s infinite;"></div>
+                    </div>
+                `,
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
+        }
+
+        // Function to update location on map
+        function updateLocationOnMap(lat, lng, accuracy) {
+            // Remove previous current location marker if exists
+            if (currentLocationMarker) {
+                map.removeLayer(currentLocationMarker);
+            }
+
+            // Add current location marker
+            currentLocationMarker = L.marker([lat, lng], {
+                icon: createCurrentLocationMarker()
+            }).addTo(map);
+
+            // Create popup for current location
+            const currentTime = new Date().toLocaleTimeString();
+            const currentLocationPopup = `
+                <div class="info-popup">
+                    <div class="popup-title">📍 Your Current Location</div>
+                    <div class="popup-address">
+                        Latitude: ${lat.toFixed(6)}<br>
+                        Longitude: ${lng.toFixed(6)}<br>
+                        Accuracy: ±${Math.round(accuracy)}m<br>
+                        Last Updated: ${currentTime}
+                    </div>
+                    <div class="popup-buttons">
+                        <button class="popup-btn directions-btn" onclick="shareLocation(${lat}, ${lng})">Share Location</button>
+                        <button class="popup-btn website-btn" onclick="viewLargerMap(${lat}, ${lng})">View on Map</button>
+                    </div>
+                </div>
+            `;
+
+            currentLocationMarker.bindPopup(currentLocationPopup);
+
+            // Add to trail if tracking
+            if (isTracking) {
+                locationTrail.push([lat, lng]);
+                updateTrail();
+            }
+        }
+
+        // Function to update location trail
+        function updateTrail() {
+            if (trailPolyline) {
+                map.removeLayer(trailPolyline);
+            }
+            
+            if (locationTrail.length > 1) {
+                trailPolyline = L.polyline(locationTrail, {
+                    color: '#4285f4',
+                    weight: 3,
+                    opacity: 0.6,
+                    smoothFactor: 1
+                }).addTo(map);
+            }
+        }
+
+        // Function to clear location trail
+        function clearTrail() {
+            locationTrail = [];
+            if (trailPolyline) {
+                map.removeLayer(trailPolyline);
+                trailPolyline = null;
+            }
+            updateStatus('', isTracking ? 'Live tracking - Trail cleared' : 'Location tracking off');
+        }
+
+        // Function to toggle live tracking
+        function toggleTracking() {
+            if (isTracking) {
+                stopTracking();
+            } else {
+                startTracking();
+            }
+        }
+
+        // Function to start live tracking
+        function startTracking() {
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by this browser.");
+                return;
+            }
+
+            isTracking = true;
+            trackBtn.textContent = '⏹ Stop Live Tracking';
+            trackBtn.classList.add('active');
+            updateStatus('tracking', 'Starting live tracking...');
+
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 30000
+            };
+
+            watchId = navigator.geolocation.watchPosition(
+                function(position) {
+                    const now = Date.now();
+                    
+                    // Throttle updates to prevent excessive API calls
+                    if (now - lastUpdateTime < UPDATE_INTERVAL) {
+                        return;
+                    }
+                    lastUpdateTime = now;
+
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+
+                    updateLocationOnMap(lat, lng, accuracy);
+                    updateStatus('tracking', Live tracking active (±${Math.round(accuracy)}m));
+                    
+                    console.log(Live location update: ${lat}, ${lng} (±${accuracy}m));
+                },
+                function(error) {
+                    let errorMessage = '';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = "Location access denied";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = "Location unavailable";
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = "Location request timeout";
+                            break;
+                        default:
+                            errorMessage = "Location error occurred";
+                    }
+                    
+                    updateStatus('error', errorMessage);
+                    console.error('Live tracking error:', errorMessage);
+                },
+                options
+            );
+        }
+
+        // Function to stop live tracking
+        function stopTracking() {
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            
+            isTracking = false;
+            trackBtn.textContent = '🎯 Start Live Tracking';
+            trackBtn.classList.remove('active');
+            updateStatus('', 'Location tracking stopped');
+        }
+
+        // Function to get current location (one-time)
+        function getCurrentLocation() {
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by this browser.");
+                return;
+            }
+
+            const locationButton = document.getElementById('location-btn');
+            const originalText = locationButton.textContent;
+            locationButton.textContent = 'Getting location...';
+            locationButton.disabled = true;
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+
+                    updateLocationOnMap(lat, lng, accuracy);
+                    
+                    // Center map on current location
+                    map.setView([lat, lng], 16);
+
+                    if (!isTracking) {
+                        updateStatus('', Location updated (±${Math.round(accuracy)}m));
+                    }
+
+                    // Reset button
+                    locationButton.textContent = originalText;
+                    locationButton.disabled = false;
+
+                    console.log(Current location: ${lat}, ${lng} (±${accuracy}m));
+                },
+                function(error) {
+                    let errorMessage = '';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = "Location access denied by user.";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = "Location information unavailable.";
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = "Location request timed out.";
+                            break;
+                        default:
+                            errorMessage = "An unknown error occurred.";
+                    }
+                    
+                    alert('Error getting location: ' + errorMessage);
+                    updateStatus('error', 'Location error');
+                    
+                    // Reset button
+                    locationButton.textContent = originalText;
+                    locationButton.disabled = false;
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 60000
+                }
+            );
+        }
+
+        // Function to get directions (opens Google Maps)
+        function getDirections(lat, lng) {
+            const url = https://www.google.com/maps/dir/?api=1&destination=${lat},${lng};
+            window.open(url, '_blank');
+        }
+
+        // Function to view larger map
+        function viewLargerMap(lat, lng) {
+            const url = https://www.google.com/maps/@${lat},${lng},16z;
+            window.open(url, '_blank');
+        }
+
+        // Function to share current location
+        function shareLocation(lat, lng) {
+            const locationUrl = https://www.google.com/maps/@${lat},${lng},16z;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My Current Location',
+                    text: 'Check out my current location!',
+                    url: locationUrl
+                });
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(locationUrl).then(() => {
+                    alert('Location URL copied to clipboard!');
+                }).catch(() => {
+                    prompt('Copy this location URL:', locationUrl);
+                });
+            }
+        }
+
+        // Add map controls
+        L.control.scale({
+            position: 'bottomright'
+        }).addTo(map);
+
+        // Add click event to show coordinates (useful for adding new locations)
+        map.on('click', function(e) {
+            console.log("Clicked at: " + e.latlng.lat + ", " + e.latlng.lng);
+        });
+
+        // Clean up on page unload
+        window.addEventListener('beforeunload', function() {
+            if (isTracking) {
+                stopTracking();
+            }
+        });
+
+        // Handle page visibility changes (pause tracking when tab is hidden to save battery)
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden && isTracking) {
+                // Optionally pause tracking when tab is hidden
+                console.log('Tab hidden - tracking continues in background');
+            } else if (!document.hidden && isTracking) {
+                console.log('Tab visible - tracking active');
+            }
+        });
+    </script>
+</body>
+</html>

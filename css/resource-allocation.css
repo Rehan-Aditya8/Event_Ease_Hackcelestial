@@ -274,7 +274,7 @@
 .select-input {
     background: rgba(255, 255, 255, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
+    color: black;
     padding: 8px 12px;
     border-radius: 6px;
     font-size: 0.9rem;
@@ -1163,7 +1163,7 @@
 
 .btn.ghost {
     background: transparent;
-    color: #6c757d;
+    color:black ;
     border: 1px solid #dee2e6;
 }
 

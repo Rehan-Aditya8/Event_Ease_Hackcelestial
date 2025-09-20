@@ -187,8 +187,42 @@
             <button id="close-scanner" class="btn ghost">← Back to Options</button>
           </div>
           <div class="scanner-container">
-            <video id="scanner-preview" class="scanner"></video>
-            <div class="scanner-overlay"></div>
+            <div class="scanner-area">
+              <video id="scanner-preview" class="scanner"></video>
+              <div class="scanner-overlay">
+                <div class="scanner-frame">
+                  <div class="scanner-corners">
+                    <div class="corner top-left"></div>
+                    <div class="corner top-right"></div>
+                    <div class="corner bottom-left"></div>
+                    <div class="corner bottom-right"></div>
+                  </div>
+                </div>
+                <p class="scanner-instruction">Position QR code within the frame</p>
+                <div class="scanner-status" id="scanner-status">
+                  <span class="status-text">Camera not started</span>
+                </div>
+              </div>
+            </div>
+            <div class="scanner-controls">
+              <button id="start-camera" class="btn primary">Start Camera</button>
+              <button id="stop-camera" class="btn secondary" style="display: none;">Stop Camera</button>
+              <button id="switch-camera" class="btn ghost" style="display: none;">Switch Camera</button>
+            </div>
+            <div class="scanner-info">
+              <div class="info-item">
+                <span class="info-icon">📱</span>
+                <span class="info-text">Hold your device steady</span>
+              </div>
+              <div class="info-item">
+                <span class="info-icon">🎯</span>
+                <span class="info-text">Center QR code in frame</span>
+              </div>
+              <div class="info-item">
+                <span class="info-icon">💡</span>
+                <span class="info-text">Ensure good lighting</span>
+              </div>
+            </div>
           </div>
           <div id="scan-result" class="scan-result hidden">
             <div class="result-content"></div>
