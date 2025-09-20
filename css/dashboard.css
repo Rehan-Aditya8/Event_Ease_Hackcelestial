@@ -18,6 +18,11 @@
     width: 100%;
 }
 
+.announcement-form .wh-clr {
+    color: white;
+}
+
+
 .dashboard-navbar .nav-brand {
     display: flex;
     align-items: center;
