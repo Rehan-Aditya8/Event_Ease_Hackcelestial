@@ -299,7 +299,7 @@ body {
 
     background: var(--bg-primary);
     padding: 1.5rem;
-   border-radius: var(--radius-xl);
+   border-radius:1rem;
     box-shadow: var(--shadow-md);
     display: flex;
     align-items: center;
@@ -1013,7 +1013,7 @@ body {
 
 .chat-inputs input[type="text"] {
     padding: 0.875rem 1rem;
-    color: #ffffff;
+    color: black;
     border: 2px solid var(--border-color);
     border-radius: var(--radius-md);
     font-size: 0.95rem;
@@ -1026,7 +1026,7 @@ body {
     border-color: var(--primary-color);
     background: var(--bg-primary);
     box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
-    color: white;
+    color: black;
 }
 
 .file-input {
@@ -2617,8 +2617,8 @@ select:focus-visible {
   
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-md);
-    padding: var(--spacing-md);
+    border-radius: 1rem;
+    padding: 2rem;
     display: flex;
     align-items: center;
     gap: var(--spacing-md);

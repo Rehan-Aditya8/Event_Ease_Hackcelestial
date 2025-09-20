@@ -425,7 +425,7 @@ function getAnnouncementFormData() {
         title: document.getElementById('announcement-title')?.value.trim() || '',
         content: document.getElementById('announcement-content')?.value.trim() || '',
         priority: document.getElementById('announcement-priority')?.value || 'general',
-        category: document.getElementById('announcement-category')?.value || 'general'
+        category: 'general' // Default category since form doesn't have this field
     };
 }
 
@@ -446,10 +446,6 @@ function validateAnnouncementForm(data) {
 
     if (!data.priority) {
         errors.push('Priority is required');
-    }
-
-    if (!data.category) {
-        errors.push('Category is required');
     }
 
     if (errors.length > 0) {
@@ -483,9 +479,12 @@ function closeAnnouncementPreview() {
 }
 
 function postAnnouncement(data) {
+    console.log('Attempting to post announcement:', data);
+    
     try {
         // Get existing announcements
         const announcements = JSON.parse(localStorage.getItem('announcements') || '[]');
+        console.log('Existing announcements:', announcements);
         
         // Create new announcement
         const newAnnouncement = {
@@ -499,11 +498,21 @@ function postAnnouncement(data) {
             authorId: 'volunteer-' + Date.now()
         };
         
+        console.log('New announcement created:', newAnnouncement);
+        
         // Add to beginning of array (newest first)
         announcements.unshift(newAnnouncement);
         
         // Save to localStorage
         localStorage.setItem('announcements', JSON.stringify(announcements));
+        console.log('Announcement saved to localStorage');
+        
+        // Trigger storage event for other tabs/windows (like user dashboard)
+        window.dispatchEvent(new StorageEvent('storage', {
+            key: 'announcements',
+            newValue: JSON.stringify(announcements),
+            url: window.location.href
+        }));
         
         // Clear form
         clearAnnouncementForm();
@@ -511,24 +520,36 @@ function postAnnouncement(data) {
         // Reload announcements display
         loadAnnouncements();
         
-        // Add to activity feed
-        addActivityFeedItem({
-            type: 'announcement',
-            title: 'New Announcement Posted',
-            description: `"${data.title}" - ${data.priority} priority`,
-            time: 'Just now',
-            icon: '📢'
-        });
+        // Add to activity feed (if function exists)
+        if (typeof addActivityFeedItem === 'function') {
+            addActivityFeedItem({
+                type: 'announcement',
+                title: 'New Announcement Posted',
+                description: `"${data.title}" - ${data.priority} priority`,
+                time: 'Just now',
+                icon: '📢'
+            });
+        }
         
         // Show success message
-        showToast(`Announcement "${data.title}" posted successfully!`, 'success');
+        if (typeof showToast === 'function') {
+            showToast(`Announcement "${data.title}" posted successfully!`, 'success');
+        } else {
+            alert(`Announcement "${data.title}" posted successfully!`);
+        }
         
         // Update stats
         updateAnnouncementStats();
         
+        console.log('Announcement posted successfully');
+        
     } catch (error) {
         console.error('Error posting announcement:', error);
-        showToast('Failed to post announcement. Please try again.', 'error');
+        if (typeof showToast === 'function') {
+            showToast('Failed to post announcement. Please try again.', 'error');
+        } else {
+            alert('Failed to post announcement. Please try again.');
+        }
     }
 }
 
@@ -547,40 +568,61 @@ function clearAnnouncementForm() {
 }
 
 function loadAnnouncements() {
+    console.log('Loading announcements in volunteer dashboard...');
+    
     try {
-        const announcements = JSON.parse(localStorage.getItem('announcements') || '[]');
-        const container = document.getElementById('announcements-list');
+        const storedData = localStorage.getItem('announcements');
+        console.log('Raw stored data:', storedData);
         
-        if (!container) return;
+        const announcements = JSON.parse(storedData || '[]');
+        console.log('Parsed announcements:', announcements);
+        
+        // Look for the correct container - announcement-items instead of announcements-list
+        const container = document.getElementById('announcement-items');
+        
+        if (!container) {
+            console.error('Announcement items container not found');
+            return;
+        }
+        
+        console.log('Found announcement items container, rendering', announcements.length, 'announcements');
         
         if (announcements.length === 0) {
+            console.log('No announcements to display');
             container.innerHTML = `
-                <div class="empty-state">
+                <li class="empty-state">
                     <div class="empty-icon">📢</div>
                     <h3>No Announcements Yet</h3>
                     <p>Create your first announcement to keep attendees informed.</p>
-                </div>
+                </li>
             `;
             return;
         }
         
-        container.innerHTML = announcements
-            .map(announcement => createAnnouncementHTML(announcement))
+        // Sort announcements by timestamp (newest first)
+        const sortedAnnouncements = announcements.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        console.log('Sorted announcements:', sortedAnnouncements);
+        
+        container.innerHTML = sortedAnnouncements
+            .map(announcement => `<li>${createAnnouncementHTML(announcement)}</li>`)
             .join('');
             
         // Add event listeners for announcement actions
         addAnnouncementActionListeners();
         
+        console.log('Announcements loaded successfully');
+        
     } catch (error) {
         console.error('Error loading announcements:', error);
-        const container = document.getElementById('announcements-list');
+        const container = document.getElementById('announcement-items');
         if (container) {
             container.innerHTML = `
-                <div class="error-state">
+                <li class="error-state">
                     <div class="error-icon">⚠️</div>
                     <h3>Error Loading Announcements</h3>
                     <p>Please refresh the page to try again.</p>
-                </div>
+                    <button onclick="loadAnnouncements()" class="btn primary">Retry</button>
+                </li>
             `;
         }
     }
@@ -709,6 +751,13 @@ function deleteAnnouncement(id) {
         const updatedAnnouncements = announcements.filter(a => a.id !== id);
         
         localStorage.setItem('announcements', JSON.stringify(updatedAnnouncements));
+        
+        // Trigger storage event for other tabs/windows (like user dashboard)
+        window.dispatchEvent(new StorageEvent('storage', {
+            key: 'announcements',
+            newValue: JSON.stringify(updatedAnnouncements),
+            url: window.location.href
+        }));
         
         // Reload announcements
         loadAnnouncements();

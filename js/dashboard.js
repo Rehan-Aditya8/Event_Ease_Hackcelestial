@@ -3,7 +3,10 @@ import { auth, db } from '../js/firebase.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
+console.log('=== DASHBOARD.JS LOADING ===');
+
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('=== DASHBOARD.JS DOM CONTENT LOADED ===');
     const userNameSpan = document.getElementById('userName');
     const userEmailSpan = document.getElementById('userEmail');
     const welcomeUserNameSpan = document.getElementById('welcomeUserName');
@@ -22,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ticketCodeSpan = document.getElementById('ticketCode');
 
     // Announcements elements
-    const announcementsList = document.getElementById('announcements-list');
+    const announcementsList = document.getElementById('announcement-items');
     const announcementFilters = document.querySelectorAll('.announcement-filters .filter-btn');
 
     // Lost & Found elements
@@ -161,6 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (viewId === 'ticket') {
             initQRScanner();
         } else if (viewId === 'announcements') {
+            console.log('=== SWITCHING TO ANNOUNCEMENTS VIEW ===');
             renderAnnouncements();
         } else if (viewId === 'lostfound') {
             initLostFoundTabs();
@@ -177,6 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add event listeners to all navigation elements
     cardButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
+            console.log('=== CARD BUTTON CLICKED ===', btn.getAttribute('data-view'));
             e.preventDefault();
             const targetView = btn.getAttribute('data-view');
             if (targetView) {
@@ -350,12 +355,50 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Announcements Functionality ---
-    let announcements = [
-        { id: 1, title: 'Welcome to HackCelestial 2.0!', content: 'The event has officially started. Enjoy your time!', priority: 'normal', timestamp: '2023-10-27T09:00:00Z', author: 'Event Team' },
-        { id: 2, title: 'Lunch Break Reminder', content: 'Lunch will be served at 12:30 PM in the main cafeteria.', priority: 'important', timestamp: '2023-10-27T12:00:00Z', author: 'Event Team' },
-        { id: 3, title: 'Emergency Drill at 3 PM', content: 'Please follow all instructions during the drill. This is NOT a real emergency.', priority: 'urgent', timestamp: '2023-10-27T14:30:00Z', author: 'Safety Team' },
-        { id: 4, title: 'Workshop: Intro to AI', content: 'Join our AI workshop at 4 PM in Room 301.', priority: 'normal', timestamp: '2023-10-27T15:00:00Z', author: 'Workshop Team' }
-    ];
+    // Load announcements from localStorage (shared with volunteer dashboard)
+    function loadAnnouncementsFromStorage() {
+        try {
+            console.log('Loading announcements from localStorage...');
+            
+            // Check if localStorage is available
+            if (typeof(Storage) === "undefined") {
+                console.warn('localStorage not supported');
+                return getDefaultAnnouncements();
+            }
+            
+            const storedData = localStorage.getItem('announcements');
+            console.log('Raw stored data:', storedData);
+            
+            const storedAnnouncements = JSON.parse(storedData || '[]');
+            console.log('Parsed announcements:', storedAnnouncements);
+            
+            // If no stored announcements, use default ones
+            if (!storedAnnouncements || storedAnnouncements.length === 0) {
+                console.log('No stored announcements found, using defaults');
+                const defaultAnnouncements = getDefaultAnnouncements();
+                localStorage.setItem('announcements', JSON.stringify(defaultAnnouncements));
+                return defaultAnnouncements;
+            }
+            
+            console.log('Successfully loaded', storedAnnouncements.length, 'announcements');
+            return storedAnnouncements;
+        } catch (error) {
+            console.error('Error loading announcements from storage:', error);
+            console.log('Falling back to default announcements');
+            return getDefaultAnnouncements();
+        }
+    }
+    
+    function getDefaultAnnouncements() {
+        return [
+            { id: 1, title: 'Welcome to HackCelestial 2.0!', content: 'The event has officially started. Enjoy your time!', priority: 'normal', timestamp: '2023-10-27T09:00:00Z', author: 'Event Team' },
+            { id: 2, title: 'Lunch Break Reminder', content: 'Lunch will be served at 12:30 PM in the main cafeteria.', priority: 'important', timestamp: '2023-10-27T12:00:00Z', author: 'Event Team' },
+            { id: 3, title: 'Emergency Drill at 3 PM', content: 'Please follow all instructions during the drill. This is NOT a real emergency.', priority: 'urgent', timestamp: '2023-10-27T14:30:00Z', author: 'Safety Team' },
+            { id: 4, title: 'Workshop: Intro to AI', content: 'Join our AI workshop at 4 PM in Room 301.', priority: 'normal', timestamp: '2023-10-27T15:00:00Z', author: 'Workshop Team' }
+        ];
+    }
+    
+    let announcements = loadAnnouncementsFromStorage();
 
     // Volunteer Announcement Form
     const announcementForm = document.getElementById('announcementForm');
@@ -383,6 +426,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
 
                 announcements.unshift(newAnnouncement); // Add to beginning
+                
+                // Save to localStorage to share with user dashboard
+                localStorage.setItem('announcements', JSON.stringify(announcements));
+                
                 renderAnnouncements();
                 
                 // Clear form
@@ -398,28 +445,64 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderAnnouncements(filter = 'all') {
+        console.log('=== RENDER ANNOUNCEMENTS START ===');
+        console.log('Rendering announcements with filter:', filter);
+        
+        // Reload announcements from storage to get latest updates
+        announcements = loadAnnouncementsFromStorage();
+        console.log('Loaded announcements for rendering:', announcements);
+        
+        // TEST: Force some test data if no announcements exist
+        if (!announcements || announcements.length === 0) {
+            console.log('No announcements found, using test data');
+            announcements = [
+                {
+                    id: 'test-1',
+                    title: 'Test Announcement',
+                    content: 'This is a test announcement to verify rendering works.',
+                    priority: 'normal',
+                    timestamp: new Date().toISOString(),
+                    author: 'Test System'
+                }
+            ];
+            console.log('Using test announcements:', announcements);
+        }
+        
+        console.log('Looking for element with ID: announcement-items');
+        const announcementsList = document.getElementById('announcement-items');
+        console.log('Found announcementsList element:', announcementsList);
+        
+        if (!announcementsList) {
+            console.error('announcementsList element not found');
+            console.log('Available elements with "announcement" in ID:');
+            const allElements = document.querySelectorAll('[id*="announcement"]');
+            allElements.forEach(el => console.log('- Found element:', el.id, el));
+            return;
+        }
+        
         announcementsList.innerHTML = '';
         const filteredAnnouncements = filter === 'all' ? announcements : announcements.filter(a => a.priority === filter);
+        console.log('Filtered announcements:', filteredAnnouncements);
 
         if (filteredAnnouncements.length === 0) {
+            console.log('No announcements to display, showing empty state');
             announcementsList.innerHTML = `
-                <div class="empty-state">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-                        <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" stroke-width="2" fill="none"/>
-                    </svg>
-                    <p>No announcements yet</p>
-                </div>
+                <li class="empty-state">No announcements yet</li>
             `;
+            console.log('Empty state HTML set');
             return;
         }
 
+        console.log('Processing', filteredAnnouncements.length, 'announcements');
         filteredAnnouncements.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        console.log('Sorted announcements:', filteredAnnouncements);
 
-        filteredAnnouncements.forEach(announcement => {
-            const announcementDiv = document.createElement('div');
-            announcementDiv.classList.add('announcement-item', announcement.priority);
+        filteredAnnouncements.forEach((announcement, index) => {
+            console.log(`Rendering announcement ${index + 1}:`, announcement);
+            const announcementLi = document.createElement('li');
+            announcementLi.classList.add('announcement-item', announcement.priority);
             const author = announcement.author || 'Event Team';
-            announcementDiv.innerHTML = `
+            const htmlContent = `
                 <h4>${announcement.title}</h4>
                 <p>${announcement.content}</p>
                 <div class="announcement-meta">
@@ -428,8 +511,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span>${new Date(announcement.timestamp).toLocaleString()}</span>
                 </div>
             `;
-            announcementsList.appendChild(announcementDiv);
+            announcementLi.innerHTML = htmlContent;
+            console.log('Created announcement element:', announcementLi);
+            announcementsList.appendChild(announcementLi);
+            console.log('Appended announcement to list');
         });
+        
+        console.log('=== RENDER ANNOUNCEMENTS COMPLETE ===');
+        console.log('Final announcementsList innerHTML:', announcementsList.innerHTML);
     }
 
     announcementFilters.forEach(btn => {
@@ -1125,10 +1214,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
+    // Listen for localStorage changes (when volunteer posts announcements)
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'announcements') {
+            console.log('Announcements updated in localStorage, refreshing...');
+            // Reload announcements if the announcements view is currently active
+            const announcementsView = document.getElementById('announcements');
+            if (announcementsView && !announcementsView.classList.contains('hidden')) {
+                renderAnnouncements();
+            }
+        }
+    });
+
     // Initializations
     updateUserInfo();
     showView('overview'); // Default view
-    renderAnnouncements();
+    // Don't render announcements on initial load - only when announcements view is shown
     renderChatMessages();
     renderVolunteerChatMessages();
     initUserMap();
