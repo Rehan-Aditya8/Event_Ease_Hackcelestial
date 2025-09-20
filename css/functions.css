@@ -325,6 +325,7 @@ body {
 }
 
 .stat-info h3 {
+    margin: 10px;
     font-size: 0.875rem;
     font-weight: 600;
     color: var(--text-secondary);
@@ -334,6 +335,7 @@ body {
 }
 
 .stat-info p {
+    margin: 10px;
     font-size: 1.25rem;
     font-weight: 700;
     color: var(--text-primary);
@@ -2631,9 +2633,10 @@ select:focus-visible {
 }
 
 .stat-icon {
+    border-radius: 0.5rem;
     width: 48px;
     height: 48px;
-    border-radius: var(--border-radius-md);
+    
     display: flex;
     align-items: center;
     justify-content: center;
